@@ -1,3 +1,4 @@
-signs/pictures/
+signs/pictures/**/*.bmp
+signs/pictures/**/*.jpg
 Debug/
 Release/
