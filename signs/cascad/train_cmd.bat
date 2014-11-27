@@ -1,0 +1,1 @@
+opencv_traincascade.exe -data haarcascade -vec samples.vec -bg ..\pictures\training_cropped\Bad.dat -numStages 16 -minhitrate 0.999 -maxFalseAlarmRate 0.4 -numPos 700 -numNeg 2524 -w 16 -h 16 -mode ALL -precalcValBufSize 500 -precalcIdxBufSize 500
