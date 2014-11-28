@@ -22,7 +22,7 @@ namespace HaarPrecisionChecker
     {
         private readonly Timer timer_ = new Timer();
 
-        public const string CascadPath = @"..\..\cascad\fakecascad\cascade.xml";
+        public const string CascadPath = @"..\..\cascad\haarcascade\cascade.xml";
         public const string TestsPath = @"..\..\pictures\test_fullsize\";
         public const string GtFilename = "gt.txt";
 
@@ -54,7 +54,7 @@ namespace HaarPrecisionChecker
             //listView1.SmallImageList = originalSigns_;
             //detectedList_.DataSource = detectedSigns_;
 
-            timer_.Interval = 1000;
+            timer_.Interval = 2000;
             timer_.Tick += TimerTick;
         }
 
