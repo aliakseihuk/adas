@@ -1,0 +1,1 @@
+download binaries: https://www.dropbox.com/s/zgxzew0joeescjj/emgu_biniries.rar?dl=0

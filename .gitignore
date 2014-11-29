@@ -2,3 +2,7 @@ signs/pictures/**/*.bmp
 signs/pictures/**/*.jpg
 Debug/
 Release/
+signs/SignDetector/bin/**/*.dll
+signs/SignDetector/bin/**/*.exe
+signs/SignDetector/bin/**/*.pdb
+signs/SignDetector/bin/**/*.manifest
