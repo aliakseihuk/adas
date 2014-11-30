@@ -11,6 +11,8 @@ namespace HaarPrecisionChecker
         private int originalDetectedCount_;
         private int falseAlarmCount_;
 
+        public long Time { get; set; }
+
         public void ProcessSigns(Rectangle[] original, Rectangle[] detected)
         {
             allOriginalCount_ += original.Length;

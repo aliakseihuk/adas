@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -16,14 +18,14 @@ namespace HaarPrecisionChecker
         public const string TestsPath = @"..\..\pictures\test_fullsize\";
         public const string GtFilename = "gt.txt";
 
-        private readonly Timer timer_ = new Timer();
+        private BackgroundWorker worker_;
         private readonly ImageList detectedSigns_ = new ImageList();
         private readonly ImageList originalSigns_ = new ImageList();
         
 
         private int current_;
         private TestImage[] images_;
-        private BackgroundWorker worker_;
+        
 
         public TestForm()
         {
@@ -33,9 +35,7 @@ namespace HaarPrecisionChecker
 
         private void Init()
         {
-            images_ = ParseGt();
-            if (images_ == null)
-                Close();
+            LoadImages();
 
             originalList_.View = View.SmallIcon;
             originalList_.SmallImageList = originalSigns_;
@@ -44,87 +44,126 @@ namespace HaarPrecisionChecker
             detectedList_.View = View.SmallIcon;
             detectedList_.SmallImageList = detectedSigns_;
             detectedList_.SmallImageList.ImageSize = new Size(32, 32);
-
-            progressBar_.Maximum = 100;
-            progressBar_.Step = 1;
-            progressBar_.Value = 0;
-
-            statusLabel_.Text = "0.00%";
-
-            timer_.Interval = 2000;
-            timer_.Tick += TimerTick;
         }
 
-        private Rectangle[] DetectMultiScale(CascadeClassifier classifier, Image<Gray, Byte> image)
+        private void LoadImages()
         {
-            return classifier.DetectMultiScale(image, 1.02, 1, new Size(10, 10), new Size(120, 120));
+            statusLabel_.Text = "Loading images";
+
+            worker_ = new BackgroundWorker { WorkerReportsProgress = true };
+            worker_.DoWork += LoadImagesAsync;
+            worker_.RunWorkerCompleted += (sender, args) =>
+            {
+                runPanel_.Enabled = true;
+                statusLabel_.Text = "Completed";
+                progressBar_.Style = ProgressBarStyle.Continuous;
+            };
+            worker_.RunWorkerAsync();
         }
 
         private void ProcessFrame()
         {
-            if (current_ >= images_.Length)
-            {
-                timer_.Stop();
-            }
             progressBar_.Value = (current_*100)/images_.Length;
             statusLabel_.Text = string.Format("{0:N0}%", ((double) current_*100)/images_.Length);
-            string imagepath = Path.Combine(TestsPath, images_[current_].Name);
-            var image = new Image<Bgr, byte>(imagepath);
-            Image<Bgr, byte> procImage = image.Clone();
+            var testImage = images_[current_];
+            Image<Bgr, byte> procImage = testImage.Image.Clone();
             using (var classifier = new CascadeClassifier(CascadPath))
             {
-                using (Image<Gray, byte> grayimage = image.Convert<Gray, Byte>())
+               // Rectangle[] signregions = DetectMultiScale(classifier, testImage.GrayImage);
+
+                originalSigns_.Images.Clear();
+                foreach (Rectangle rectangle in images_[current_].SignsAreas)
                 {
-                    Rectangle[] signregions = DetectMultiScale(classifier, grayimage);
-
-                    originalSigns_.Images.Clear();
-                    foreach (Rectangle rectangle in images_[current_].SignsAreas)
-                    {
-                        image.Draw(rectangle, new Bgr(Color.Chartreuse), 2);
-                        Image<Bgr, byte> signimage = image.GetSubRect(rectangle);
-                        originalSigns_.Images.Add(signimage.ToBitmap());
-                    }
-
-                    detectedSigns_.Images.Clear();
-                    foreach (Rectangle rectangle in signregions)
-                    {
-                        procImage.Draw(rectangle, new Bgr(Color.Chartreuse), 2);
-                        Image<Bgr, byte> signimage = procImage.GetSubRect(rectangle);
-                        detectedSigns_.Images.Add(signimage.ToBitmap());
-                    }
-                    UpdateImageList();
-                    originalBox_.Image = image.ToBitmap();
-                    detectedBox_.Image = procImage.ToBitmap();
+                    testImage.Image.Draw(rectangle, new Bgr(Color.Chartreuse), 2);
+                    Image<Bgr, byte> signimage = testImage.Image.GetSubRect(rectangle);
+                    originalSigns_.Images.Add(signimage.ToBitmap());
                 }
+
+                detectedSigns_.Images.Clear();
+                //foreach (Rectangle rectangle in signregions)
+                //{
+                //    procImage.Draw(rectangle, new Bgr(Color.Chartreuse), 2);
+                //    Image<Bgr, byte> signimage = procImage.GetSubRect(rectangle);
+                //    detectedSigns_.Images.Add(signimage.ToBitmap());
+                //}
+                UpdateImageList();
+                originalBox_.Image = testImage.Image.ToBitmap();
+                detectedBox_.Image = procImage.ToBitmap();
             }
             ++current_;
         }
 
         private void DoWork(object sender, DoWorkEventArgs e)
         {
-            var worker = (BackgroundWorker) sender;
+            var worker = (BackgroundWorker)sender;
             var statistic = new Statistic();
-            for (int i = 0; i < images_.Length; ++i)
+            using (var classifier = new Classifier())
             {
-                string imagepath = Path.Combine(TestsPath, images_[i].Name);
-                var image = new Image<Bgr, byte>(imagepath);
-                using (var classifier = new CascadeClassifier(CascadPath))
+                for (var i = 0; i < images_.Length / 5; ++i)
                 {
-                    using (Image<Gray, byte> grayimage = image.Convert<Gray, Byte>())
-                    {
-                        Rectangle[] detectedregions = DetectMultiScale(classifier, grayimage);
-                        statistic.ProcessSigns(images_[i].SignsAreas.ToArray(), detectedregions);
-                    }
+                    var testimage = images_[i];
+                    testimage.DetectedAreas.AddRange(classifier.Detect(testimage.GrayImage));
+                    statistic.ProcessSigns(testimage.SignsAreas.ToArray(), testimage.DetectedAreas.ToArray());
+                    worker.ReportProgress(i);
+                    if(preview_.Checked)
+                        Thread.Sleep(1000);
                 }
-                worker.ReportProgress((i*100)/images_.Length);
             }
             e.Result = statistic;
         }
 
+        private void LoadImagesAsync(object sender, DoWorkEventArgs e)
+        {
+            images_ = ParseGt();
+            if (images_ == null)
+                return;
+            foreach (var testimage in images_)
+                testimage.LoadImages(TestsPath);
+        }
+
         private void ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            progressBar_.Value = e.ProgressPercentage;
+            progressBar_.Value = e.ProgressPercentage * 100 / images_.Length;
             statusLabel_.Text = string.Format("{0:N0}%", e.ProgressPercentage);
+
+            if (preview_.Checked)
+            {
+                originalList_.Visible = true;
+                detectedList_.Visible = true;
+                ShowDetection(e.ProgressPercentage);
+            }
+            else
+            {
+                originalList_.Visible = false;
+                detectedList_.Visible = false;
+            }
+        }
+
+        private void ShowDetection(int i)
+        {
+            var testimage = images_[i];
+            var org = testimage.Image.Clone();
+            var det = testimage.Image.Clone();
+
+            originalSigns_.Images.Clear();
+            foreach (var rectangle in testimage.SignsAreas)
+            {
+                org.Draw(rectangle, new Bgr(Color.Chartreuse), 2);
+                Image<Bgr, byte> signimage = org.GetSubRect(rectangle);
+                originalSigns_.Images.Add(signimage.ToBitmap());
+            }
+
+            detectedSigns_.Images.Clear();
+            foreach (var rectangle in testimage.DetectedAreas)
+            {
+                det.Draw(rectangle, new Bgr(Color.Chartreuse), 2);
+                Image<Bgr, byte> signimage = det.GetSubRect(rectangle);
+                detectedSigns_.Images.Add(signimage.ToBitmap());
+            }
+
+            UpdateImageList();
+            originalBox_.Image = org.ToBitmap();
+            detectedBox_.Image = det.ToBitmap();
         }
 
         private void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -132,7 +171,7 @@ namespace HaarPrecisionChecker
             var statistic = (Statistic) e.Result;
             double p = statistic.GetPrecision()*100;
             double m = statistic.GetMistake()*100;
-            MessageBox.Show(string.Format("P: {0:N2}, M: {1:N2}", p, m));
+            MessageBox.Show(string.Format("P: {0:N2}, M: {1:N2}, T: {2}", p, m, statistic.Time));
         }
 
         private void UpdateImageList()
@@ -152,7 +191,7 @@ namespace HaarPrecisionChecker
             }
         }
 
-        private void CalculateClick(object sender, EventArgs e)
+        private void RunClick(object sender, EventArgs e)
         {
             worker_ = new BackgroundWorker { WorkerReportsProgress = true };
             worker_.DoWork += DoWork;
@@ -161,18 +200,12 @@ namespace HaarPrecisionChecker
             worker_.RunWorkerAsync();
         }
 
-        private void SlideshowClick(object sender, EventArgs e)
-        {
-            timer_.Start();
-        }
-
         private TestImage[] ParseGt()
         {
             var dict = new Dictionary<string, TestImage>();
             string gtfullpath = Path.Combine(TestsPath, GtFilename);
             if (!File.Exists(gtfullpath))
             {
-                MessageBox.Show("Gt file doesn't exist", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
             }
             using (var reader = new StreamReader(new FileStream(gtfullpath, FileMode.Open, FileAccess.Read)))
