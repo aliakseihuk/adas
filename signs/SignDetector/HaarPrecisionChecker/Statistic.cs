@@ -5,6 +5,9 @@ namespace HaarPrecisionChecker
 {
     public class Statistic
     {
+        private readonly double factor_;
+        private readonly int minNeighbours_;
+
         private int allOriginalCount_;
         private int allDetectedCount_;
 
@@ -12,6 +15,12 @@ namespace HaarPrecisionChecker
         private int falseAlarmCount_;
 
         public long Time { get; set; }
+
+        public Statistic(double factor, int minNeighbour)
+        {
+            factor_ = factor;
+            minNeighbours_ = minNeighbour;
+        }
 
         public void ProcessSigns(Rectangle[] original, Rectangle[] detected)
         {
@@ -30,6 +39,12 @@ namespace HaarPrecisionChecker
         public double GetMistake()
         {
             return ((double)falseAlarmCount_) / allDetectedCount_;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("F:{0:N2} | MN:{1:N0} | P:{2:N2}% | M:{3:N2}% | T:{4:N0}", factor_, minNeighbours_,
+                GetPrecision()*100, GetMistake()*100, Time);
         }
     }
 }

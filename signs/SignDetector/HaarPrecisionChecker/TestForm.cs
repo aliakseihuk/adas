@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Windows.Forms;
 using Emgu.CV;
@@ -61,55 +62,66 @@ namespace HaarPrecisionChecker
             worker_.RunWorkerAsync();
         }
 
-        private void ProcessFrame()
-        {
-            progressBar_.Value = (current_*100)/images_.Length;
-            statusLabel_.Text = string.Format("{0:N0}%", ((double) current_*100)/images_.Length);
-            var testImage = images_[current_];
-            Image<Bgr, byte> procImage = testImage.Image.Clone();
-            using (var classifier = new CascadeClassifier(CascadPath))
-            {
-               // Rectangle[] signregions = DetectMultiScale(classifier, testImage.GrayImage);
-
-                originalSigns_.Images.Clear();
-                foreach (Rectangle rectangle in images_[current_].SignsAreas)
-                {
-                    testImage.Image.Draw(rectangle, new Bgr(Color.Chartreuse), 2);
-                    Image<Bgr, byte> signimage = testImage.Image.GetSubRect(rectangle);
-                    originalSigns_.Images.Add(signimage.ToBitmap());
-                }
-
-                detectedSigns_.Images.Clear();
-                //foreach (Rectangle rectangle in signregions)
-                //{
-                //    procImage.Draw(rectangle, new Bgr(Color.Chartreuse), 2);
-                //    Image<Bgr, byte> signimage = procImage.GetSubRect(rectangle);
-                //    detectedSigns_.Images.Add(signimage.ToBitmap());
-                //}
-                UpdateImageList();
-                originalBox_.Image = testImage.Image.ToBitmap();
-                detectedBox_.Image = procImage.ToBitmap();
-            }
-            ++current_;
-        }
-
         private void DoWork(object sender, DoWorkEventArgs e)
         {
-            var worker = (BackgroundWorker)sender;
-            var statistic = new Statistic();
+            const double minfactor = 1.02;
+            const double maxfaxtor = 1.10;
+            const double factorstep = 0.02;
+
+            const int minminneighbours = 1;
+            const int maxminneighbours = 11;
+            const int neighbourstep = 2;
+
+            //const double minfactor = 1.05;
+            //const double maxfaxtor = 1.10;
+            //const double factorstep = 0.05;
+
+            //const int minminneighbours = 4;
+            //const int maxminneighbours = 9;
+            //const int neighbourstep = 5;
+
+            var all = (bool) e.Argument;
+            var worker = (BackgroundWorker) sender;
             using (var classifier = new Classifier())
             {
-                for (var i = 0; i < images_.Length / 5; ++i)
+                if (all)
                 {
-                    var testimage = images_[i];
-                    testimage.DetectedAreas.AddRange(classifier.Detect(testimage.GrayImage));
-                    statistic.ProcessSigns(testimage.SignsAreas.ToArray(), testimage.DetectedAreas.ToArray());
-                    worker.ReportProgress(i);
-                    if(preview_.Checked)
-                        Thread.Sleep(1000);
+                    for (var factor = minfactor; factor <= maxfaxtor; factor += factorstep)
+                    {
+                        for (var minn = minminneighbours; minn <= maxminneighbours; minn += neighbourstep)
+                        {
+                            classifier.ScaleFactor = factor;
+                            classifier.MinNeighbours = minn;
+                            statisticList_.Items.Add(CalculateStatistic(classifier, worker.ReportProgress));
+                        }
+                    }
+                }
+                else
+                {
+                    classifier.ScaleFactor = 1.10;
+                    classifier.MinNeighbours = 6;
+                    statisticList_.Items.Add(CalculateStatistic(classifier, worker.ReportProgress));
                 }
             }
-            e.Result = statistic;
+        }
+
+        private Statistic CalculateStatistic(Classifier classifier, Action<int> report)
+        {
+            var statistic = new Statistic(classifier.ScaleFactor, classifier.MinNeighbours);
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            for (var i = 0; i < images_.Length; ++i)
+            {
+                var testimage = images_[i];
+                testimage.DetectedAreas.AddRange(classifier.Detect(testimage.GrayImage));
+                statistic.ProcessSigns(testimage.SignsAreas.ToArray(), testimage.DetectedAreas.ToArray());
+                report(i);
+                if(slowcheckbox_.Checked)
+                    Thread.Sleep(1000);
+            }
+            stopWatch.Stop();
+            statistic.Time = stopWatch.ElapsedMilliseconds/1000;
+            return statistic;
         }
 
         private void LoadImagesAsync(object sender, DoWorkEventArgs e)
@@ -123,8 +135,9 @@ namespace HaarPrecisionChecker
 
         private void ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            progressBar_.Value = e.ProgressPercentage * 100 / images_.Length;
-            statusLabel_.Text = string.Format("{0:N0}%", e.ProgressPercentage);
+            var percent = e.ProgressPercentage * 100 / images_.Length;
+            progressBar_.Value = percent;
+            statusLabel_.Text = string.Format("{0:N0}%", percent);
 
             if (preview_.Checked)
             {
@@ -136,6 +149,8 @@ namespace HaarPrecisionChecker
             {
                 originalList_.Visible = false;
                 detectedList_.Visible = false;
+                originalBox_.Image = null;
+                detectedBox_.Image = null;
             }
         }
 
@@ -168,10 +183,8 @@ namespace HaarPrecisionChecker
 
         private void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            var statistic = (Statistic) e.Result;
-            double p = statistic.GetPrecision()*100;
-            double m = statistic.GetMistake()*100;
-            MessageBox.Show(string.Format("P: {0:N2}, M: {1:N2}, T: {2}", p, m, statistic.Time));
+            runButton_.Enabled = true;
+            runAllButton_.Enabled = true;
         }
 
         private void UpdateImageList()
@@ -193,11 +206,25 @@ namespace HaarPrecisionChecker
 
         private void RunClick(object sender, EventArgs e)
         {
+            StartWorker(false);
+        }
+
+        private void RunAllClick(object sender, EventArgs e)
+        {
+            StartWorker(true);
+        }
+
+        private void StartWorker(bool all)
+        {
+            statisticList_.Items.Clear();
+            runButton_.Enabled = false;
+            runAllButton_.Enabled = false;
+            
             worker_ = new BackgroundWorker { WorkerReportsProgress = true };
             worker_.DoWork += DoWork;
             worker_.ProgressChanged += ProgressChanged;
             worker_.RunWorkerCompleted += RunWorkerCompleted;
-            worker_.RunWorkerAsync();
+            worker_.RunWorkerAsync(all);
         }
 
         private TestImage[] ParseGt()
@@ -230,11 +257,6 @@ namespace HaarPrecisionChecker
                 }
             }
             return dict.Values.ToArray();
-        }
-
-        private void TimerTick(object sender, EventArgs e)
-        {
-            ProcessFrame();
         }
     }
 }
