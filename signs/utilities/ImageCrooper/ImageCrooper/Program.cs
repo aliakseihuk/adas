@@ -25,6 +25,22 @@ namespace ImageCrooper
         public const string BadDir = "Bad\\";
         public const string BadFilename = "Bad.dat";
 
+        private static HashSet<int> allowedSignType_ = new HashSet<int>
+        {
+            0,  //speed limit 20 (prohibitory)
+            1,  //speed limit 30 (prohibitory)
+            2,  //speed limit 50 (prohibitory)
+            3,  //speed limit 60 (prohibitory)
+            4,  //speed limit 70 (prohibitory)
+            5,  //speed limit 80 (prohibitory)
+            7,  //speed limit 100 (prohibitory)
+            8,  //speed limit 120 (prohibitory)
+            9,  //no overtaking (prohibitory)
+            10, //no overtaking (trucks) (prohibitory)
+            15, //no traffic both ways (prohibitory)
+            16  //no trucks (prohibitory)
+        };
+
         public const int BadCountPerImage = 3;
 
         private static string SourceDir;
@@ -80,10 +96,14 @@ namespace ImageCrooper
                     var y1 = int.Parse(info[2]);
                     var x2 = int.Parse(info[3]);
                     var y2 = int.Parse(info[4]);
-                    if (!dict.ContainsKey(name))
-                        dict[name] = new Image(name);
-                    var area = new Rectangle(x1, y1, x2, y2);
-                    dict[name].SignsAreas.Add(area);
+                    var signClass = int.Parse(info[5]);
+                    if (allowedSignType_.Contains(signClass))
+                    {
+                        if (!dict.ContainsKey(name))
+                            dict[name] = new Image(name);
+                        var area = new Rectangle(x1, y1, x2, y2);
+                        dict[name].SignsAreas.Add(area);
+                    }
                 }
             }
 
@@ -105,15 +125,13 @@ namespace ImageCrooper
 
             var goodcounter = 0;
             var badcounter = 0;
-            var allcount = images.Count();
             foreach (var image in images)
             {
                 Console.WriteLine("Processed: {0}", goodcounter);
                 var i = 0;
                 var imagesrcpath = string.Format("{0}.bmp", image.Name);
                 imagesrcpath = Path.Combine(SourceDir, imagesrcpath);
-                Bitmap srcimage = new Bitmap(imagesrcpath);
-                
+                Bitmap srcimage = new Bitmap(imagesrcpath);               
 
                 foreach (var area in image.SignsAreas)
                 {

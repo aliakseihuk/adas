@@ -4,6 +4,6 @@
     <StartArguments>e:\adas\signs\pictures\training\ e:\adas\signs\pictures\result\</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <StartArguments>e:\adas\signs\pictures\training\ e:\adas\signs\pictures\result\</StartArguments>
+    <StartArguments>e:\adas\signs\pictures\training_fullsize\ e:\adas\signs\pictures\result\</StartArguments>
   </PropertyGroup>
 </Project>
