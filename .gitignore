@@ -1,5 +1,7 @@
 signs/pictures/**/*.bmp
 signs/pictures/**/*.jpg
+signs/pictures/**/*.png
+signs/pictures/**/*.jp2
 Debug/
 Release/
 signs/SignDetector/bin/**/*.dll

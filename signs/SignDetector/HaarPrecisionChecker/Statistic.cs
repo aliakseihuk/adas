@@ -8,19 +8,19 @@ namespace HaarPrecisionChecker
         private readonly double factor_;
         private readonly int minNeighbours_;
 
-        private int allOriginalCount_;
         private int allDetectedCount_;
+        private int allOriginalCount_;
 
-        private int originalDetectedCount_;
         private int falseAlarmCount_;
-
-        public long Time { get; set; }
+        private int originalDetectedCount_;
 
         public Statistic(double factor, int minNeighbour)
         {
             factor_ = factor;
             minNeighbours_ = minNeighbour;
         }
+
+        public long Time { get; set; }
 
         public void ProcessSigns(Rectangle[] original, Rectangle[] detected)
         {
@@ -33,12 +33,12 @@ namespace HaarPrecisionChecker
 
         public double GetPrecision()
         {
-            return ((double)originalDetectedCount_) / allOriginalCount_;
+            return ((double) originalDetectedCount_)/allOriginalCount_;
         }
 
         public double GetMistake()
         {
-            return ((double)falseAlarmCount_) / allDetectedCount_;
+            return ((double) falseAlarmCount_)/allDetectedCount_;
         }
 
         public override string ToString()

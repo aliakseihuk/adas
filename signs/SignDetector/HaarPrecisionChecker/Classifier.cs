@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
@@ -12,11 +9,11 @@ namespace HaarPrecisionChecker
     {
         public const string CascadPath = @"..\..\cascad\haarcascade\cascade.xml";
 
-        private readonly CascadeClassifier internalClassifier_;
+        private readonly CascadeClassifier _internalClassifier;
 
         public Classifier()
         {
-            internalClassifier_ = new CascadeClassifier(CascadPath);
+            _internalClassifier = new CascadeClassifier(CascadPath);
             ScaleFactor = 1.1;
             MinNeighbours = 6;
             MinSize = new Size(10, 10);
@@ -30,12 +27,12 @@ namespace HaarPrecisionChecker
 
         public Rectangle[] Detect(Image<Gray, byte> image)
         {
-            return internalClassifier_.DetectMultiScale(image, ScaleFactor, MinNeighbours, MinSize, MaxSize);
+            return _internalClassifier.DetectMultiScale(image, ScaleFactor, MinNeighbours, MinSize, MaxSize);
         }
 
         public void Dispose()
         {
-            internalClassifier_.Dispose();
+            _internalClassifier.Dispose();
         }
     }
 }
