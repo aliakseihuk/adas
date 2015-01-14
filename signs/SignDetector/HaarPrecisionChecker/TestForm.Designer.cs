@@ -49,7 +49,9 @@
             this.slowcheckbox_ = new System.Windows.Forms.CheckBox();
             this.runButton_ = new System.Windows.Forms.Button();
             this.preview_ = new System.Windows.Forms.CheckBox();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -61,6 +63,8 @@
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scaleTrackBar_)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.minnTrackBar_)).BeginInit();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -68,7 +72,7 @@
             this.splitContainer1.BackColor = System.Drawing.Color.White;
             this.splitContainer1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -83,8 +87,8 @@
             this.splitContainer1.Panel2.Controls.Add(this.label2);
             this.splitContainer1.Panel2.Controls.Add(this.detectedBox_);
             this.splitContainer1.Panel2.Controls.Add(this.detectedList_);
-            this.splitContainer1.Size = new System.Drawing.Size(610, 517);
-            this.splitContainer1.SplitterDistance = 257;
+            this.splitContainer1.Size = new System.Drawing.Size(596, 485);
+            this.splitContainer1.SplitterDistance = 241;
             this.splitContainer1.SplitterWidth = 1;
             this.splitContainer1.TabIndex = 4;
             // 
@@ -106,7 +110,7 @@
             this.originalBox_.Dock = System.Windows.Forms.DockStyle.Fill;
             this.originalBox_.Location = new System.Drawing.Point(0, 0);
             this.originalBox_.Name = "originalBox_";
-            this.originalBox_.Size = new System.Drawing.Size(569, 253);
+            this.originalBox_.Size = new System.Drawing.Size(555, 237);
             this.originalBox_.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.originalBox_.TabIndex = 0;
             this.originalBox_.TabStop = false;
@@ -116,10 +120,10 @@
             this.originalList_.BackColor = System.Drawing.Color.Black;
             this.originalList_.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.originalList_.Dock = System.Windows.Forms.DockStyle.Right;
-            this.originalList_.Location = new System.Drawing.Point(569, 0);
+            this.originalList_.Location = new System.Drawing.Point(555, 0);
             this.originalList_.Name = "originalList_";
             this.originalList_.Scrollable = false;
-            this.originalList_.Size = new System.Drawing.Size(37, 253);
+            this.originalList_.Size = new System.Drawing.Size(37, 237);
             this.originalList_.TabIndex = 2;
             this.originalList_.UseCompatibleStateImageBehavior = false;
             this.originalList_.Visible = false;
@@ -142,7 +146,7 @@
             this.detectedBox_.Dock = System.Windows.Forms.DockStyle.Fill;
             this.detectedBox_.Location = new System.Drawing.Point(0, 0);
             this.detectedBox_.Name = "detectedBox_";
-            this.detectedBox_.Size = new System.Drawing.Size(569, 255);
+            this.detectedBox_.Size = new System.Drawing.Size(555, 239);
             this.detectedBox_.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.detectedBox_.TabIndex = 0;
             this.detectedBox_.TabStop = false;
@@ -153,10 +157,10 @@
             this.detectedList_.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.detectedList_.Dock = System.Windows.Forms.DockStyle.Right;
             this.detectedList_.ForeColor = System.Drawing.Color.White;
-            this.detectedList_.Location = new System.Drawing.Point(569, 0);
+            this.detectedList_.Location = new System.Drawing.Point(555, 0);
             this.detectedList_.Name = "detectedList_";
             this.detectedList_.Scrollable = false;
-            this.detectedList_.Size = new System.Drawing.Size(37, 255);
+            this.detectedList_.Size = new System.Drawing.Size(37, 239);
             this.detectedList_.TabIndex = 2;
             this.detectedList_.UseCompatibleStateImageBehavior = false;
             this.detectedList_.Visible = false;
@@ -323,12 +327,44 @@
             this.preview_.Text = "Show preview";
             this.preview_.UseVisualStyleBackColor = true;
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(610, 517);
+            this.tabControl1.TabIndex = 3;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.splitContainer1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(602, 491);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "tabPage1";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(602, 491);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(731, 539);
-            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.status);
             this.Name = "TestForm";
@@ -349,6 +385,8 @@
             this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scaleTrackBar_)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minnTrackBar_)).EndInit();
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -377,7 +415,9 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TrackBar scaleTrackBar_;
         private System.Windows.Forms.TrackBar minnTrackBar_;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
     }
 }
 
