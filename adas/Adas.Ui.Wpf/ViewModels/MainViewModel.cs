@@ -10,8 +10,9 @@ namespace Adas.Ui.Wpf.ViewModels
             FlowModel = new OpticalFlowModel();
         }
 
+
+        public bool IsRunCamera { get; set; }
         public StereoSgbmModel SgbmModel { get; set; }
         public OpticalFlowModel FlowModel { get; set; }
-
     }
 }

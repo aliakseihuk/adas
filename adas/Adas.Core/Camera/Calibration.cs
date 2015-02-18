@@ -8,6 +8,18 @@ using Emgu.CV.Structure;
 
 namespace Adas.Core.Camera
 {
+    public class CalibrationCorners
+    {
+        public CalibrationCorners(PointF[] leftCorners, PointF[] rightCorners)
+        {
+            LeftCorners = leftCorners;
+            RightCorners = rightCorners;
+        }
+    
+        public PointF[] LeftCorners { get; private set; }
+        public PointF[] RightCorners { get; private set; }
+    }
+
     public class CalibrationSettings: ICloneable
     {
         private Size _patternSize;
@@ -77,7 +89,7 @@ namespace Adas.Core.Camera
         public Rectangle Rectangle { get; set; }
     }
 
-    public class CalibrationStereoResult
+    public class CalibrationStereoResult: ICloneable
     {
         public CalibrationStereoResult(CalibrationSettings settings)
         {
@@ -98,6 +110,12 @@ namespace Adas.Core.Camera
         public CalibrationCameraResult Camera2Result { get; set; }
 
         public Matrix<double> Q { get; set; }
+
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 
 
@@ -121,7 +139,7 @@ namespace Adas.Core.Camera
             image.RightImage = Remap(image.RightImage, mapX, mapY);
         }
 
-        public static CalibrationStereoResult Calibrate(CalibrationSettings settings, PointF[][] imagesLeftCorners, PointF[][] imagesRightCorners)
+        public static CalibrationStereoResult Calibrate(CalibrationSettings settings, CalibrationCorners[] corners)
         {
             var calibrationResult = new CalibrationStereoResult(settings);
 
@@ -143,8 +161,8 @@ namespace Adas.Core.Camera
             //if you use FIX_ASPECT_RATIO and FIX_FOCAL_LEGNTH options, these values needs to be set in the intrinsic parameters before the CalibrateCamera function is called. Otherwise 0 values are used as default.
             CameraCalibration.StereoCalibrate(
                 points,
-                imagesLeftCorners.ToArray(),
-                imagesRightCorners.ToArray(),
+                corners.Select(_ => _.LeftCorners).ToArray(),
+                corners.Select(_ => _.RightCorners).ToArray(),
                 calibrationResult.Camera1Result.IntrinsicParameters,
                 calibrationResult.Camera2Result.IntrinsicParameters,
                 calibrationResult.Settings.ImageSize,
@@ -182,12 +200,14 @@ namespace Adas.Core.Camera
             return calibrationResult;
         }
 
-        public static bool FindChessboardCorners(StereoImage<Bgr, byte> stereoImage, Size patternSize, out PointF[] leftCorners, out PointF[] rightCorners)
+        public static CalibrationCorners FindChessboardCorners(StereoImage<Bgr, byte> stereoImage, Size patternSize)
         {
             var grayStereoImage = stereoImage.Convert<Gray, byte>();
-            leftCorners = FindChessboardCorners(grayStereoImage.LeftImage, patternSize);
-            rightCorners = FindChessboardCorners(grayStereoImage.RightImage, patternSize);
-            return leftCorners != null && rightCorners != null;
+            var leftCorners = FindChessboardCorners(grayStereoImage.LeftImage, patternSize);
+            var rightCorners = FindChessboardCorners(grayStereoImage.RightImage, patternSize);
+            if (leftCorners != null && rightCorners != null)
+                return new CalibrationCorners(leftCorners, rightCorners);
+            return null;
         }
 
         private static PointF[] FindChessboardCorners(Image<Gray, byte> image, Size patternSize)
@@ -201,17 +221,17 @@ namespace Adas.Core.Camera
             return corners;
         }
 
-        public static StereoImage<Bgr, byte> DrawChessboardCorners(StereoImage<Bgr, byte> stereoImage, PointF[] leftCorners, PointF[] rightCorners)
+        public static StereoImage<Bgr, byte> DrawChessboardCorners(StereoImage<Bgr, byte> stereoImage, CalibrationCorners corners)
         {
-            var colors = new Bgr[leftCorners.Length];
+            var colors = new Bgr[corners.LeftCorners.Length];
             var random = new Random();
             for (var i = 0; i < colors.Length; ++i)
             {
                 colors[i] = new Bgr(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255));
             }
 
-            DrawChessboardCorners(stereoImage.LeftImage, leftCorners, colors);
-            DrawChessboardCorners(stereoImage.RightImage, rightCorners, colors);
+            DrawChessboardCorners(stereoImage.LeftImage, corners.LeftCorners, colors);
+            DrawChessboardCorners(stereoImage.RightImage, corners.RightCorners, colors);
 
             return stereoImage;
         }

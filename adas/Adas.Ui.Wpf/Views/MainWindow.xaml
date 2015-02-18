@@ -1,6 +1,7 @@
-﻿<Window x:Class="Adas.Ui.Wpf.Views.MainWindow"
+﻿<Views:StereoWindow x:Class="Adas.Ui.Wpf.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Views="clr-namespace:Adas.Ui.Wpf.Views"
         Title="MainWindow" Height="600" Width="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -16,7 +17,7 @@
 
         <Menu >
             <MenuItem x:Name="CameraItem" Header="Camera">
-                <MenuItem Header="Initialize" Click="CameraInitClick"/>
+                <MenuItem Header="Initialize" Click="CameraInitializeClick"/>
                 <MenuItem Header="Calibrate">
                     <MenuItem Header="Make Calibration" Click="CameraMakeCalibrationClick"/>
                     <MenuItem Header="Load Calibration" Click="CameraLoadCalibrationClick"/>
@@ -136,7 +137,6 @@
             </Grid>
 
             <Button x:Name="ActionButton" Click="ActionClick">Run</Button>
-            <Button x:Name="RefreshButton" Click="RefreshClick" IsEnabled="false">Refresh</Button>
         </StackPanel>
 
         <Image x:Name="LeftImageHolder" Grid.Row="1" Grid.Column="1"/>
@@ -144,4 +144,4 @@
         <Image x:Name="DisparityImageHolder" Grid.Row="2" Grid.Column="1" />
         <Image x:Name="FlowImageHolder" Grid.Row="2" Grid.Column="2" />
     </Grid>
-</Window>
+</Views:StereoWindow>

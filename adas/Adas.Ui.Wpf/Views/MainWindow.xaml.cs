@@ -1,20 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using Adas.Core;
-using Adas.Core.Algo;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
 
@@ -23,68 +10,52 @@ namespace Adas.Ui.Wpf.Views
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : StereoWindow
     {
-        private readonly StereoCamera _stereoCamera = new StereoCamera();
-        private readonly DispatcherTimer _background;
-
-        private bool _isRun;
-        
         public MainWindow()
         {
-            MainViewModel = new MainViewModel();
-            ComputeModel = new ComputeModel();
-
             InitializeComponent();
-            DataContext = MainViewModel;
 
-            _background = new DispatcherTimer(DispatcherPriority.Background);
-            _background.Tick += ProcessFrames;
+            Model = new AdasModel();
+            ViewModel = new MainViewModel();
+            
+            DataContext = ViewModel;
         }
 
-        public MainViewModel MainViewModel { get; set; }
-        public ComputeModel ComputeModel { get; set; }
+        public MainViewModel ViewModel { get; set; }
 
-        private void ProcessFrames(object sender, EventArgs e)
+        protected override void ProcessImages(object sender, EventArgs e)
         {
-            if (_stereoCamera.IsEnabled)
-            {
-                var stereoImage = _stereoCamera.GetStereoImage();
-                LeftImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
-                RightImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
-            }
+            var stereoImage = Model.StereoCamera.GetStereoImage();
+            LeftImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
+            RightImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
         }
 
         private void ActionClick(object sender, RoutedEventArgs e)
         {
-            if (!_isRun)
+            if (!Model.StereoCamera.IsEnabled) return;
+
+            if (!ViewModel.IsRunCamera)
             {
-                if (!_stereoCamera.IsEnabled) return;
-                ActionButton.Content = "Stop";
-                _background.Start();
+                ActionButton.Content = "Stop Camera";
+                DispatcherTimer.Start();
             }
             else
             {
-                ActionButton.Content = "Run";
-                _background.Stop();
+                ActionButton.Content = "Run Camera";
+                DispatcherTimer.Stop();
             }
-            _isRun = !_isRun;
-            RefreshButton.IsEnabled = _isRun;
-        }
 
-        private void RefreshClick(object sender, RoutedEventArgs e)
-        {
-            ComputeModel.SgbmModel = (StereoSgbmModel)MainViewModel.SgbmModel.Clone();
-            ComputeModel.FlowModer = (OpticalFlowModel)MainViewModel.FlowModel.Clone();
+            ViewModel.IsRunCamera = !ViewModel.IsRunCamera;
         }
 
         #region Camera Items
 
-        private void CameraInitClick(object sender, RoutedEventArgs e)
+        private void CameraInitializeClick(object sender, RoutedEventArgs e)
         {
             var item = (MenuItem) sender;
-            _stereoCamera.Init();
-            if (_stereoCamera.IsEnabled)
+            Model.StereoCamera.Init();
+            if (Model.StereoCamera.IsEnabled)
             {
                 item.Header = "Reinitialize";
                 foreach (var childItem in CameraItem.Items.OfType<MenuItem>())
@@ -98,17 +69,17 @@ namespace Adas.Ui.Wpf.Views
         {
             var item = (MenuItem)sender;
             var resolution = (Resolution) Enum.Parse(typeof (Resolution), "r" + item.Header, true);
-            _stereoCamera.SetResolution(resolution);
+            Model.StereoCamera.SetResolution(resolution);
         }
 
         private void CameraSwapClick(object sender, RoutedEventArgs e)
         {
-            _stereoCamera.SwapCameras();
+            Model.StereoCamera.SwapCameras();
         }
 
         private void CameraMakeCalibrationClick(object sender, RoutedEventArgs e)
         {
-            var calibrateWindow = new CalibrationWindow(_stereoCamera);
+            var calibrateWindow = new CalibrationWindow(Model);
             calibrateWindow.ShowDialog();
         }
 

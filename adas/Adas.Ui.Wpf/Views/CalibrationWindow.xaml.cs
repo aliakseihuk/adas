@@ -1,48 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
+using Emgu.CV.Structure;
 
 namespace Adas.Ui.Wpf.Views
 {
     /// <summary>
     /// Interaction logic for CalibrationWindow.xaml
     /// </summary>
-    public partial class CalibrationWindow : Window
+    public partial class CalibrationWindow
     {
-        private readonly StereoCamera _stereoCamera;
-        private CalibrationMode _mode = CalibrationMode.Waiting;
-        private readonly DispatcherTimer _background;
-        private readonly Stopwatch _stopwatch = new Stopwatch();
-        private readonly List<PointF[]> _imagesLeftCorners = new List<PointF[]>();
-        private readonly List<PointF[]> _imagesRightCorners = new List<PointF[]>();
-        private CalibrationStereoResult _result;
-
-        
-        public CalibrationWindow(StereoCamera camera)
+        public CalibrationWindow(AdasModel model)
         {
-            _stereoCamera = camera;
             InitializeComponent();
-            ViewModel = new CalibrationViewModel();
+
+            Model = model;
+            
+            if (Model.CalibrationResult != null)
+            {
+                var result = (CalibrationStereoResult)Model.CalibrationResult.Clone();
+                ViewModel = new CalibrationViewModel(result) { Mode = CalibrationMode.ShowCalibrated };
+            }
+            else
+            {
+                ViewModel = new CalibrationViewModel {Mode = CalibrationMode.ShowNotCalibrated};
+            }
             DataContext = ViewModel;
 
-            _background = new DispatcherTimer(DispatcherPriority.Background);
-            _background.Tick += ProcessFrame;
+            DispatcherTimer.Start();
         }
 
         public CalibrationViewModel ViewModel { get; set; }
@@ -50,81 +39,94 @@ namespace Adas.Ui.Wpf.Views
         private void CalibrateClick(object sender, RoutedEventArgs e)
         {
             var button = (Button) sender;
-            switch (_mode)
+            switch (ViewModel.Mode)
             {
-                case CalibrationMode.Waiting:
+                case CalibrationMode.ShowNotCalibrated: //start to collect samples
+                    ViewModel.Mode = CalibrationMode.GettingSamples;
                     PropertiesGrid.IsEnabled = false;
-                    button.Content = "Stop";
-                    _mode = CalibrationMode.GettingSamples;
-                    _background.Start();
+                    button.Content = "Restart";
                     break;
-                case CalibrationMode.GettingSamples:
+
+                case CalibrationMode.GettingSamples: //stop collect samples
+                    ViewModel.Mode = CalibrationMode.ShowNotCalibrated;
                     PropertiesGrid.IsEnabled = true;
-                    button.Content = "Getting Samples";
-                    _background.Stop();
-                    _mode = CalibrationMode.Waiting;
+                    ViewModel.Samples.Clear();
+                    button.Content = "Getting samples";
                     break;
-                case CalibrationMode.Calibrating:
-                    _result = StereoCalibration.Calibrate(ViewModel.Settings, _imagesLeftCorners.ToArray(),
-                        _imagesRightCorners.ToArray());
-                    button.Content = "Show";
-                    _mode = CalibrationMode.Showing;
+
+                case CalibrationMode.ReadyCalibrating: //calibrate samples async
+                    button.Content = "Calibrating...";
+                    button.IsEnabled = false;
+
+                    var task = new Task(() =>
+                    {
+                        var settings = (CalibrationSettings)ViewModel.Settings.Clone();
+                        ViewModel.CalibrationResult = StereoCalibration.Calibrate(settings, ViewModel.Samples.Select(_ => _.Corners).ToArray());
+                        ViewModel.Samples.Clear();
+                        ViewModel.Mode = CalibrationMode.ShowCalibrated;
+                        button.Content = "Restart";
+                        button.IsEnabled = true;
+                        PropertiesGrid.IsEnabled = true;
+                    });
+                    task.Start();
                     break;
-                case CalibrationMode.Showing:
-                    _background.Start();
+                
+                case CalibrationMode.ShowCalibrated: //reset result and start to collect samples again
+                    ViewModel.CalibrationResult = null;
+                    ViewModel.Mode = CalibrationMode.ShowNotCalibrated;
+                    CalibrateClick(sender, e);
                     break;
             }
         }
 
-        private void ProcessFrame(object sender, EventArgs e)
+        protected override void ProcessImages(object sender, EventArgs e)
         {
-            if (_stereoCamera.IsEnabled)
+            if (Model.StereoCamera.IsEnabled)
             {
-                var stereoImage = _stereoCamera.GetStereoImage();
+                var stereoImage = Model.StereoCamera.GetStereoImage();
+                var corners = StereoCalibration.FindChessboardCorners(stereoImage, ViewModel.Settings.PatternSize);
+                if (corners == null) return;
 
-                if (_mode == CalibrationMode.GettingSamples)
+                StereoCalibration.DrawChessboardCorners(stereoImage, corners);
+
+                if (ViewModel.Mode == CalibrationMode.ShowCalibrated)
                 {
-                    PointF[] leftCorners;
-                    PointF[] rightCorners;
-                    if (StereoCalibration.FindChessboardCorners(stereoImage, ViewModel.Settings.PatternSize,
-                        out leftCorners, out rightCorners))
-                    {
-                        StereoCalibration.DrawChessboardCorners(stereoImage, leftCorners, rightCorners);
-                        if (!_stopwatch.IsRunning || _stopwatch.ElapsedMilliseconds > ViewModel.Delay)
-                        {
-                            _imagesLeftCorners.Add(leftCorners);
-                            _imagesRightCorners.Add(rightCorners);
-                            _stopwatch.Restart();
-                        }
-                    }
+                    ShowCalibratedResult(stereoImage);
+                    return;
+                }
 
-                    LeftImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
-                    RightImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
-                    if (_imagesLeftCorners.Count == ViewModel.Settings.Count)
+                bool showSample = false;
+                if (ViewModel.Mode == CalibrationMode.GettingSamples)
+                {
+                    showSample = true;
+                    if (ViewModel.AllowSaveCorners)
                     {
-                        _mode = CalibrationMode.Calibrating;
-                        ActionButton.Content = "Calibrate";
-                        _background.Stop();
-                        _stopwatch.Stop();
+                        ViewModel.Samples.Add(new CalibratationSample(stereoImage, corners));
+                        ViewModel.InvalidateSamples = true;
+                        if (ViewModel.Settings.Count == ViewModel.Samples.Count)
+                            ViewModel.Mode = CalibrationMode.ReadyCalibrating;
                     }
                 }
-                if (_mode == CalibrationMode.Showing)
-                {
-                    LeftImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
-                    RightImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
-                    StereoCalibration.RemapStereoImage(stereoImage, _result);
-                    LeftResultImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
-                    RightResultImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
-                }
+                showSample |= ViewModel.Mode == CalibrationMode.ReadyCalibrating;
+                showSample &= ViewModel.InvalidateSamples;
+                if(showSample)
+                    ShowNextSampleResult();
             }
         }
-    }
 
-    public enum CalibrationMode
-    {
-        GettingSamples,
-        Calibrating,
-        Waiting,
-        Showing,
+        private void ShowNextSampleResult()
+        {
+            var lastSample = ViewModel.Samples.Last();
+            LeftResultImageHolder.Source = lastSample.StereoImage.LeftImage.ToBitmap().ToBitmapSource();
+            RightResultImageHolder.Source = lastSample.StereoImage.RightImage.ToBitmap().ToBitmapSource();
+            ViewModel.InvalidateSamples = false;
+        }
+
+        private void ShowCalibratedResult(StereoImage<Bgr, byte> stereoImage)
+        {
+            StereoCalibration.RemapStereoImage(stereoImage, ViewModel.CalibrationResult);
+            LeftResultImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
+            RightResultImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
+        }
     }
 }
