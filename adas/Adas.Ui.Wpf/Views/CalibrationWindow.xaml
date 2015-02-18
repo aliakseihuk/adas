@@ -1,0 +1,69 @@
+﻿<Window x:Class="Adas.Ui.Wpf.Views.CalibrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CalibrationWindow" Height="400" Width="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="160" />
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.RowSpan="2">
+            <StackPanel.Resources>
+                <Style TargetType="Label">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="RowDefinition">
+                    <Setter Property="Height" Value="26" />
+                </Style>
+                <Style TargetType="TextBox">
+                    <Setter Property="Margin" Value="3" />
+                </Style>
+            </StackPanel.Resources>
+            <Label>Settings</Label>
+            <Grid x:Name="PropertiesGrid">
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0">Image Count</Label>
+                <Label Grid.Row="1" Grid.Column="0">Chessboard Height</Label>
+                <Label Grid.Row="2" Grid.Column="0">Chessboard Width</Label>
+                <Label Grid.Row="3" Grid.Column="0">Cell Height</Label>
+                <Label Grid.Row="4" Grid.Column="0">Cell Width</Label>
+                <Label Grid.Row="5" Grid.Column="0">Delay</Label>
+
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Settings.Count}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Settings.ChessboardHeight}" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=Settings.ChessboardWidth}" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=Settings.CellHeight}" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=Settings.CellWidth}" />
+                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=Delay}" />
+
+            </Grid>
+
+            <Button x:Name="ActionButton" Click="CalibrateClick">Getting Samples</Button>
+            
+        </StackPanel>
+
+        <Image x:Name="LeftImageHolder" Grid.Row="0" Grid.Column="1" />
+        <Image x:Name="RightImageHolder" Grid.Row="0" Grid.Column="2" />
+        <Image x:Name="LeftResultImageHolder" Grid.Row="1" Grid.Column="1" />
+        <Image x:Name="RightResultImageHolder" Grid.Row="1" Grid.Column="2" />
+
+    </Grid>
+</Window>

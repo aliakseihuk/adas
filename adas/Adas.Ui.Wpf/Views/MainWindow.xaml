@@ -1,0 +1,147 @@
+﻿<Window x:Class="Adas.Ui.Wpf.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="600" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="160" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+
+        <Menu >
+            <MenuItem x:Name="CameraItem" Header="Camera">
+                <MenuItem Header="Initialize" Click="CameraInitClick"/>
+                <MenuItem Header="Calibrate">
+                    <MenuItem Header="Make Calibration" Click="CameraMakeCalibrationClick"/>
+                    <MenuItem Header="Load Calibration" Click="CameraLoadCalibrationClick"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Resolution" IsEnabled="False">
+                    <MenuItem Header="320x240"  Click="CameraResolutionClick"/>
+                    <MenuItem Header="640x480"  Click="CameraResolutionClick"/>
+                    <MenuItem Header="800x600"  Click="CameraResolutionClick"/>
+                    <MenuItem Header="1280x720" Click="CameraResolutionClick"/>
+                </MenuItem>
+                <MenuItem Header="Actions" IsEnabled="False">
+                    <MenuItem Header="Swap" Click="CameraSwapClick"/>
+                    <MenuItem ></MenuItem>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Settings">
+                <MenuItem Header="Undo"></MenuItem>
+                <MenuItem Header="Redo"></MenuItem>
+                <Separator></Separator>
+                <MenuItem Header="Cut"></MenuItem>
+                <MenuItem Header="Copy"></MenuItem>
+                <MenuItem Header="Paste"></MenuItem>-
+            </MenuItem>
+        </Menu>
+
+        <!-- properties grid -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.RowSpan="2">
+            <StackPanel.Resources>
+                <Style TargetType="Label">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="RowDefinition">
+                    <Setter Property="Height" Value="26" />
+                </Style>
+                <Style TargetType="TextBox">
+                    <Setter Property="Margin" Value="3" />
+                </Style>
+            </StackPanel.Resources>
+
+            <Label>Disparity</Label>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0">Min Disparity</Label>
+                <Label Grid.Row="1" Grid.Column="0">Num Disparity</Label>
+                <Label Grid.Row="2" Grid.Column="0">SAD Window Size</Label>
+                <Label Grid.Row="3" Grid.Column="0">P1</Label>
+                <Label Grid.Row="4" Grid.Column="0">P2</Label>
+                <Label Grid.Row="5" Grid.Column="0">Disparity Max Diff</Label>
+                <Label Grid.Row="6" Grid.Column="0">Prefilter Cap</Label>
+                <Label Grid.Row="7" Grid.Column="0">Uniqueness Ratio</Label>
+                <Label Grid.Row="8" Grid.Column="0">Speckle Window Size</Label>
+                <Label Grid.Row="9" Grid.Column="0">Speckle Range</Label>
+
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=SgbmModel.MinDisparity}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=SgbmModel.NumDisparity}" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=SgbmModel.SadWindowSize}" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=SgbmModel.P1, Mode=OneWay}" IsReadOnly="true" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=SgbmModel.P2, Mode=OneWay}" IsReadOnly="true" />
+                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=SgbmModel.Disparity12MaxDiff}" />
+                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Path=SgbmModel.PreFilterCap}" />
+                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Path=SgbmModel.UniquenessRatio}" />
+                <TextBox Grid.Row="8" Grid.Column="1" Text="{Binding Path=SgbmModel.SpeckleWindowSize}" />
+                <TextBox Grid.Row="9" Grid.Column="1" Text="{Binding Path=SgbmModel.SpeckleRange}" />
+            </Grid>
+
+            <Label>Flow</Label>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0">Pyramid Scale</Label>
+                <Label Grid.Row="1" Grid.Column="0">Levels</Label>
+                <Label Grid.Row="2" Grid.Column="0">Window Size</Label>
+                <Label Grid.Row="3" Grid.Column="0">Iterations</Label>
+                <Label Grid.Row="4" Grid.Column="0">Poly N</Label>
+                <Label Grid.Row="5" Grid.Column="0">Poly Sigma</Label>
+
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=FlowModel.PyramidScale}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=FlowModel.Levels}" />
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=FlowModel.WindowSize}" />
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=FlowModel.Iterations}" />
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=FlowModel.PolyN, Mode=OneWay}"
+                         IsReadOnly="true" />
+                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=FlowModel.PolySigma, Mode=OneWay}"
+                         IsReadOnly="true" />
+            </Grid>
+
+            <Button x:Name="ActionButton" Click="ActionClick">Run</Button>
+            <Button x:Name="RefreshButton" Click="RefreshClick" IsEnabled="false">Refresh</Button>
+        </StackPanel>
+
+        <Image x:Name="LeftImageHolder" Grid.Row="1" Grid.Column="1"/>
+        <Image x:Name="RightImageHolder" Grid.Row="1" Grid.Column="2" />
+        <Image x:Name="DisparityImageHolder" Grid.Row="2" Grid.Column="1" />
+        <Image x:Name="FlowImageHolder" Grid.Row="2" Grid.Column="2" />
+    </Grid>
+</Window>

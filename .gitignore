@@ -8,3 +8,4 @@ signs/SignDetector/bin/**/*.dll
 signs/SignDetector/bin/**/*.exe
 signs/SignDetector/bin/**/*.pdb
 signs/SignDetector/bin/**/*.manifest
+bin/*.*
