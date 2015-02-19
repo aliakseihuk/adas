@@ -1,7 +1,6 @@
-﻿<Views:StereoWindow x:Class="Adas.Ui.Wpf.Views.MainWindow"
+﻿<Window x:Class="Adas.Ui.Wpf.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Views="clr-namespace:Adas.Ui.Wpf.Views"
         Title="MainWindow" Height="600" Width="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -144,4 +143,4 @@
         <Image x:Name="DisparityImageHolder" Grid.Row="2" Grid.Column="1" />
         <Image x:Name="FlowImageHolder" Grid.Row="2" Grid.Column="2" />
     </Grid>
-</Views:StereoWindow>
+</Window>

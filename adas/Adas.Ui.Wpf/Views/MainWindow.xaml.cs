@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
 
@@ -10,43 +11,49 @@ namespace Adas.Ui.Wpf.Views
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : StereoWindow
+    public partial class MainWindow
     {
+        private readonly MainViewModel _viewModel;
+        private readonly AdasModel _model;
+        private readonly DispatcherTimer _dispatcherTimer;
+
         public MainWindow()
         {
             InitializeComponent();
 
-            Model = new AdasModel();
-            ViewModel = new MainViewModel();
+            _model = new AdasModel();
+            _viewModel = new MainViewModel();
             
-            DataContext = ViewModel;
+            DataContext = _viewModel;
+            _dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
+            _dispatcherTimer.Tick += ProcessImages;
         }
 
-        public MainViewModel ViewModel { get; set; }
+        
 
-        protected override void ProcessImages(object sender, EventArgs e)
+        private void ProcessImages(object sender, EventArgs e)
         {
-            var stereoImage = Model.StereoCamera.GetStereoImage();
+            var stereoImage = _model.StereoCamera.GetStereoImage();
             LeftImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
             RightImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
         }
 
         private void ActionClick(object sender, RoutedEventArgs e)
         {
-            if (!Model.StereoCamera.IsEnabled) return;
+            if (!_model.StereoCamera.IsEnabled) return;
 
-            if (!ViewModel.IsRunCamera)
+            if (!_viewModel.IsRunCamera)
             {
                 ActionButton.Content = "Stop Camera";
-                DispatcherTimer.Start();
+                _dispatcherTimer.Start();
             }
             else
             {
                 ActionButton.Content = "Run Camera";
-                DispatcherTimer.Stop();
+                _dispatcherTimer.Stop();
             }
 
-            ViewModel.IsRunCamera = !ViewModel.IsRunCamera;
+            _viewModel.IsRunCamera = !_viewModel.IsRunCamera;
         }
 
         #region Camera Items
@@ -54,8 +61,8 @@ namespace Adas.Ui.Wpf.Views
         private void CameraInitializeClick(object sender, RoutedEventArgs e)
         {
             var item = (MenuItem) sender;
-            Model.StereoCamera.Init();
-            if (Model.StereoCamera.IsEnabled)
+            _model.StereoCamera.Init();
+            if (_model.StereoCamera.IsEnabled)
             {
                 item.Header = "Reinitialize";
                 foreach (var childItem in CameraItem.Items.OfType<MenuItem>())
@@ -69,17 +76,17 @@ namespace Adas.Ui.Wpf.Views
         {
             var item = (MenuItem)sender;
             var resolution = (Resolution) Enum.Parse(typeof (Resolution), "r" + item.Header, true);
-            Model.StereoCamera.SetResolution(resolution);
+            _model.StereoCamera.SetResolution(resolution);
         }
 
         private void CameraSwapClick(object sender, RoutedEventArgs e)
         {
-            Model.StereoCamera.SwapCameras();
+            _model.StereoCamera.SwapCameras();
         }
 
         private void CameraMakeCalibrationClick(object sender, RoutedEventArgs e)
         {
-            var calibrateWindow = new CalibrationWindow(Model);
+            var calibrateWindow = new CalibrationWindow(_model);
             calibrateWindow.ShowDialog();
         }
 

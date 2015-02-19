@@ -1,7 +1,6 @@
-﻿<Views:StereoWindow x:Class="Adas.Ui.Wpf.Views.CalibrationWindow"
+﻿<Window x:Class="Adas.Ui.Wpf.Views.CalibrationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Views="clr-namespace:Adas.Ui.Wpf.Views"
         Title="CalibrationWindow" Height="400" Width="600">
     <Grid>
         <Grid.RowDefinitions>
@@ -67,4 +66,4 @@
         <Image x:Name="RightResultImageHolder" Grid.Row="1" Grid.Column="2" />
 
     </Grid>
-</Views:StereoWindow>
+</Window>
