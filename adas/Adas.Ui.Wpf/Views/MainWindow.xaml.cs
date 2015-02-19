@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Xml.Serialization;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
 
@@ -28,14 +30,12 @@ namespace Adas.Ui.Wpf.Views
             _dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
             _dispatcherTimer.Tick += ProcessImages;
         }
-
         
-
         private void ProcessImages(object sender, EventArgs e)
         {
             var stereoImage = _model.StereoCamera.GetStereoImage();
-            LeftImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
-            RightImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
+            SourceImage.ViewModel.Image = stereoImage;
+            SourceImage.Refresh();
         }
 
         private void ActionClick(object sender, RoutedEventArgs e)
@@ -69,6 +69,8 @@ namespace Adas.Ui.Wpf.Views
                 {
                     childItem.IsEnabled = true;
                 }
+                SourceImage.ViewModel.Title1 = "Camera 1";
+                SourceImage.ViewModel.Title2 = "Camera 2";
             }
         }
 
@@ -92,7 +94,11 @@ namespace Adas.Ui.Wpf.Views
 
         private void CameraLoadCalibrationClick(object sender, RoutedEventArgs e)
         {
-
+            XmlSerializer mySerializer = new XmlSerializer(typeof(CalibrationStereoResult));
+            // To read the file, create a FileStream.
+            FileStream myFileStream = new FileStream("D:\\111.csr", FileMode.Open);
+            // Call the Deserialize method and cast to the object type.
+            _model.CalibrationResult = (CalibrationStereoResult) mySerializer.Deserialize(myFileStream);
         }
 
         #endregion //Camera Items

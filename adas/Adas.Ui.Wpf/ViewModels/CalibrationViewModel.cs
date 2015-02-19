@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Adas.Core.Camera;
+using Adas.Ui.Wpf.Annotations;
 using Adas.Ui.Wpf.Views;
 using Emgu.CV.Structure;
 
 namespace Adas.Ui.Wpf.ViewModels
 {
-    public class CalibrationViewModel
+    public class CalibrationViewModel : INotifyPropertyChanged
     {
         private readonly Stopwatch stopwatch_ = new Stopwatch();
 
@@ -41,9 +44,19 @@ namespace Adas.Ui.Wpf.ViewModels
             get
             {
                 var allow = !stopwatch_.IsRunning || stopwatch_.ElapsedMilliseconds > Delay;
-                stopwatch_.Restart();
+                if(allow)
+                    stopwatch_.Restart();
                 return allow;
             }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
@@ -61,7 +74,7 @@ namespace Adas.Ui.Wpf.ViewModels
 
     public enum CalibrationMode
     {
-        GettingSamples,
+        CollectingSamples,
         ReadyCalibrating,
         ShowNotCalibrated,
         ShowCalibrated,

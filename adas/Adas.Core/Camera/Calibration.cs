@@ -91,6 +91,11 @@ namespace Adas.Core.Camera
 
     public class CalibrationStereoResult: ICloneable
     {
+        public CalibrationStereoResult() : this(null)
+        {
+
+        }
+
         public CalibrationStereoResult(CalibrationSettings settings)
         {
             Settings = settings;
@@ -101,7 +106,7 @@ namespace Adas.Core.Camera
             Q = new Matrix<double>(4, 4);
         }
 
-        public CalibrationSettings Settings { get; private set; }
+        public CalibrationSettings Settings { get; set; }
 
         public PointF[][] CornersPointsLeft { get; set; }
         public PointF[][] CornersPointsRight { get; set; }
