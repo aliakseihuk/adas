@@ -41,9 +41,16 @@
     <Reference Include="Emgu.Util">
       <HintPath>..\..\bin\Emgu.Util.dll</HintPath>
     </Reference>
+    <Reference Include="MahApps.Metro">
+      <HintPath>..\packages\MahApps.Metro.1.0.0.0\lib\net45\MahApps.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.0.0.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -62,7 +69,18 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="ViewModels\SetupViewModel.cs" />
     <Compile Include="ViewModels\StereoImageViewModel.cs" />
+    <Compile Include="AdasController.cs" />
+    <Compile Include="Views\Setup\SetupCalibrationControl.xaml.cs">
+      <DependentUpon>SetupCalibrationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Setup\SetupSourceControl.xaml.cs">
+      <DependentUpon>SetupSourceControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Setup\SetupWindow.xaml.cs">
+      <DependentUpon>SetupWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\StereoImageControl.xaml.cs">
       <DependentUpon>StereoImageControl.xaml</DependentUpon>
     </Compile>
@@ -89,6 +107,18 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\Setup\SetupCalibrationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Setup\SetupSourceControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Setup\SetupWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\StereoImageControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -113,6 +143,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

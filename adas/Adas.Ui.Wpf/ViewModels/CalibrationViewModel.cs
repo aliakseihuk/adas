@@ -25,17 +25,21 @@ namespace Adas.Ui.Wpf.ViewModels
 
         public CalibrationViewModel(CalibrationStereoResult result)
         {
-            CalibrationResult = result;
-            Settings = result != null ? (CalibrationSettings) result.Settings.Clone() : new CalibrationSettings();
+            //CalibrationResult = result;
+            //Settings = result != null ? (CalibrationSettings) result.Settings.Clone() : new CalibrationSettings();
             Samples = new List<CalibratationSample>();
             Delay = 1000;
         }
 
         public CalibrationMode Mode { get; set; }
-        public CalibrationSettings Settings { get; set; }
-        public CalibrationStereoResult CalibrationResult { get; set; }
+        //public CalibrationSettings Settings { get; set; }
+        //public CalibrationStereoResult CalibrationResult { get; set; }
         
         public int Delay { get; set; }
+
+
+
+
         public List<CalibratationSample> Samples { get; private set; }
         public bool InvalidateSamples { get; set; }
 
@@ -62,6 +66,11 @@ namespace Adas.Ui.Wpf.ViewModels
 
     public class CalibratationSample
     {
+        public CalibratationSample(StereoImageFileInfo fileInfo)
+        {
+
+        }
+
         public CalibratationSample(StereoImage<Bgr, byte> image, CalibrationCorners corners)
         {
             StereoImage = image;
@@ -70,6 +79,8 @@ namespace Adas.Ui.Wpf.ViewModels
 
         public StereoImage<Bgr, byte> StereoImage { get; private set; }
         public CalibrationCorners Corners { get; private set; }
+
+
     }
 
     public enum CalibrationMode

@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
+using Microsoft.Win32;
 
 namespace Adas.Ui.Wpf.Views
 {
@@ -77,7 +78,7 @@ namespace Adas.Ui.Wpf.Views
         private void CameraResolutionClick(object sender, RoutedEventArgs e)
         {
             var item = (MenuItem)sender;
-            var resolution = (Resolution) Enum.Parse(typeof (Resolution), "r" + item.Header, true);
+            var resolution = (StereoCamera.Resolution) Enum.Parse(typeof (StereoCamera.Resolution), "r" + item.Header, true);
             _model.StereoCamera.SetResolution(resolution);
         }
 
@@ -88,17 +89,24 @@ namespace Adas.Ui.Wpf.Views
 
         private void CameraMakeCalibrationClick(object sender, RoutedEventArgs e)
         {
-            var calibrateWindow = new CalibrationWindow(_model);
-            calibrateWindow.ShowDialog();
+            //var calibrateWindow = new CalibrationWindow(_model);
+            //calibrateWindow.ShowDialog();
         }
 
         private void CameraLoadCalibrationClick(object sender, RoutedEventArgs e)
         {
-            XmlSerializer mySerializer = new XmlSerializer(typeof(CalibrationStereoResult));
-            // To read the file, create a FileStream.
-            FileStream myFileStream = new FileStream("D:\\111.csr", FileMode.Open);
-            // Call the Deserialize method and cast to the object type.
-            _model.CalibrationResult = (CalibrationStereoResult) mySerializer.Deserialize(myFileStream);
+            var opendialog = new OpenFileDialog();
+            opendialog.DefaultExt = "config";
+            opendialog.Filter = "Calibration Files(*.calib)|*.calib|All files (*.*)|*.*";
+            opendialog.InitialDirectory = Directory.GetCurrentDirectory();
+            if (opendialog.ShowDialog() == true)
+            {
+                var mySerializer = new XmlSerializer(typeof (CalibrationStereoResult));
+                using (var myFileStream = new FileStream(opendialog.FileName, FileMode.Open))
+                {
+                    _model.CalibrationModel.CalibrationResult = (CalibrationStereoResult)mySerializer.Deserialize(myFileStream);
+                }
+            }
         }
 
         #endregion //Camera Items

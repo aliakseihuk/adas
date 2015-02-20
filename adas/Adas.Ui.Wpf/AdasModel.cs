@@ -11,10 +11,24 @@ namespace Adas.Ui.Wpf
     {
         public AdasModel()
         {
-            StereoCamera = new StereoCamera();
+            CalibrationModel = new CalibrationModel();
         }
 
         public StereoCamera StereoCamera { get; set; }
+        public CalibrationModel CalibrationModel { get; set; }
+
+        public SourceMode Mode { get; set; }
+    }
+
+    public class CalibrationModel
+    {
         public CalibrationStereoResult CalibrationResult { get; set; }
+        public StereoImageFileInfo[] CalibrationSamples { get; set; }
+    }
+
+    public enum SourceMode
+    {
+        Camera,
+        Image
     }
 }

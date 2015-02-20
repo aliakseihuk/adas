@@ -56,10 +56,15 @@
     <Compile Include="Algo\Stereo.cs" />
     <Compile Include="Camera\StereoCamera.cs" />
     <Compile Include="Camera\Calibration.cs" />
+    <Compile Include="Camera\StereoImage.cs" />
+    <Compile Include="SerializationHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Network\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\stereo_images.sti" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
