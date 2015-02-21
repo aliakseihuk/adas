@@ -1,13 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ArrayOfStereoImageInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <StereoImageInfo>
+<ArrayOfStereoImageFileInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <StereoImageFileInfo>
     <Name>Image1</Name>
-    <LeftImageFile>left_image1_path</LeftImageFile>
-    <RightImageFile>right_image1_path</RightImageFile>
-  </StereoImageInfo>
-  <StereoImageInfo>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left01.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right01.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
     <Name>Image2</Name>
-    <LeftImageFile>left_image2_path</LeftImageFile>
-    <RightImageFile>right_image2_path</RightImageFile>
-  </StereoImageInfo>
-</ArrayOfStereoImageInfo>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left02.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right02.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image3</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left03.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right03.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image4</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left04.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right04.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image5</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left05.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right05.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image6</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left06.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right06.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image7</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left07.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right07.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image8</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left08.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right08.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image9</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left09.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right09.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image10</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left10.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right10.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image11</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left11.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right11.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image12</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left12.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right12.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image13</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left13.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right13.jpg</RightImagePath>
+  </StereoImageFileInfo>
+  <StereoImageFileInfo>
+    <Name>Image14</Name>
+    <LeftImagePath>e:\adas\Adas\Adas.Core\Data\samples\left14.jpg</LeftImagePath>
+    <RightImagePath>e:\adas\Adas\Adas.Core\Data\samples\right14.jpg</RightImagePath>
+  </StereoImageFileInfo>
+</ArrayOfStereoImageFileInfo>

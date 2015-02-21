@@ -13,38 +13,48 @@ namespace Adas.Ui.Wpf.ViewModels
 {
     public class StereoImageViewModel: INotifyPropertyChanged
     {
-        public string _title1;
-        public string _title2;
+        private StereoImage<Bgr, byte> _image;
+        
+        private bool _showLeft;
+        private bool _showRight;
 
         public StereoImageViewModel()
         {
-            Title1 = "Image 1";
-            Title2 = "Image 2";
+            _showLeft = true;
+            _showRight = true;
         }
 
-        public StereoImage<Bgr, byte> Image { get; set; }
-
-        public string Title1 {
-            get { return _title1; }
-            set
-            {
-                if (_title1 == value) return;
-                _title1 = value;
-                OnPropertyChanged();
-            }
-        }
-        public string Title2
+        public StereoImage<Bgr, byte> Image
         {
-            get { return _title2; }
+            get { return _image; }
             set
             {
-                if (_title2 == value) return;
-                _title2 = value;
+                if (Equals(value, _image)) return;
+                _image = value;
                 OnPropertyChanged();
             }
         }
 
-        public bool IsLive { get; set; }
+        public bool ShowLeft {
+            get { return _showLeft; }
+            set
+            {
+                if (_showLeft == value) return;
+                _showLeft = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool ShowRight
+        {
+            get { return _showRight; }
+            set
+            {
+                if (_showRight == value) return;
+                _showRight = value;
+                OnPropertyChanged();
+            }
+        }
+
         public bool ShowCustomize { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;

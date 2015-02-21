@@ -36,7 +36,7 @@ namespace Adas.Ui.Wpf.Views
         {
             var stereoImage = _model.StereoCamera.GetStereoImage();
             SourceImage.ViewModel.Image = stereoImage;
-            SourceImage.Refresh();
+            //SourceImage.Refresh();
         }
 
         private void ActionClick(object sender, RoutedEventArgs e)
@@ -70,8 +70,9 @@ namespace Adas.Ui.Wpf.Views
                 {
                     childItem.IsEnabled = true;
                 }
-                SourceImage.ViewModel.Title1 = "Camera 1";
-                SourceImage.ViewModel.Title2 = "Camera 2";
+
+                //SourceImage.ViewModel.Title1 = "Camera 1";
+                //SourceImage.ViewModel.ShowRight = "Camera 2";
             }
         }
 

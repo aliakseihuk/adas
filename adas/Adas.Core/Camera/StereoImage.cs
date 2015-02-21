@@ -10,15 +10,13 @@ namespace Adas.Core.Camera
         public Image<TColor, TDepth> LeftImage { get; set; }
         public Image<TColor, TDepth> RightImage { get; set; }
 
-        public static StereoImage<TOtherColor, TOtherDepth> Load<TOtherColor, TOtherDepth>(StereoImageFileInfo fileInfo)
-            where TOtherColor : struct, IColor
-            where TOtherDepth : new()
+        public static StereoImage<TColor, TDepth> Load(StereoImageFileInfo fileInfo)
         {
-            return new StereoImage<TOtherColor, TOtherDepth>()
+            return new StereoImage<TColor, TDepth>()
             {
                 Name = fileInfo.Name,
-                LeftImage = new Image<TOtherColor, TOtherDepth>(fileInfo.LeftImagePath),
-                RightImage = new Image<TOtherColor, TOtherDepth>(fileInfo.LeftImagePath),
+                LeftImage = new Image<TColor, TDepth>(fileInfo.LeftImagePath),
+                RightImage = new Image<TColor, TDepth>(fileInfo.LeftImagePath),
             };
         }
 

@@ -67,12 +67,13 @@ namespace Adas.Ui.Wpf.Views.Setup
             {
                 DefaultExt = "sti",
                 Filter = "Stereo images Files(*.sti)|*.sti|All files (*.*)|*.*",
-                InitialDirectory = Directory.GetCurrentDirectory(),
+                //InitialDirectory = Directory.GetCurrentDirectory(),
+                InitialDirectory = @"e:\adas\Adas\Adas.Core\Data\"
             };
 
             if (opendialog.ShowDialog() == true)
             {
-                Model.CalibrationModel.CalibrationSamples =
+                Model.CalibrationModel.CalibrationSamplesInfo =
                     SerializationHelper<StereoImageFileInfo[]>.XmlDeserialize(opendialog.FileName);
                 SetCalibrateButtonAppearance(true);
             }

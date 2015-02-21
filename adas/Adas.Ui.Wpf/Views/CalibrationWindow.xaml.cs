@@ -28,56 +28,111 @@ namespace Adas.Ui.Wpf.Views
             InitializeComponent();
 
             Controller = controller;
-            
-            if (_model.CalibrationModel.CalibrationResult != null)
+
+            if (Model.CalibrationModel.CalibrationResult != null)
             {
-                var result = (CalibrationStereoResult)_model.CalibrationModel.CalibrationResult.Clone();
-                _viewModel = new CalibrationViewModel(result);
-                SetMode(CalibrationMode.ShowCalibrated);
+                _viewModel = new CalibrationViewModel(Model.CalibrationModel.CalibrationResult.Settings);
+
             }
             else
             {
                 _viewModel = new CalibrationViewModel();
-                SetMode(CalibrationMode.ShowNotCalibrated);
+                Flyout.IsOpen = true;
+                Grid.SetRowSpan(SourceImage, 2);
+                ResultImage.Visibility = Visibility.Collapsed;
             }
-            DataContext = _viewModel;
 
-            var dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
-            dispatcherTimer.Tick += ProcessImages;
-            dispatcherTimer.Start();
+            if (Model.Mode == SourceMode.Camera)
+            {
+
+            }
+            else
+            {
+                LoadSamples();
+            }
+
+            DataContext = _viewModel;
+            //if (Model.CalibrationModel.CalibrationResult != null)
+            //{
+            //    var result = (CalibrationStereoResult)_model.CalibrationModel.CalibrationResult.Clone();
+            //    _viewModel = new CalibrationViewModel(result);
+            //    SetMode(CalibrationMode.ShowCalibrated);
+            //}
+            //else
+            //{
+            //    _viewModel = new CalibrationViewModel();
+            //    SetMode(CalibrationMode.ShowNotCalibrated);
+            //}
+            
+
+            //var dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
+            //dispatcherTimer.Tick += ProcessImages;
+            //dispatcherTimer.Start();
         }
 
         public AdasController Controller { get; private set; }
+
         public AdasModel Model
         {
             get { return Controller.Model; }
         }
 
-
-        private void CalibrateClick(object sender, RoutedEventArgs e)
+        private void LoadSamples()
         {
-            var button = (Button) sender;
-            switch (_viewModel.Mode)
+            var infos = Model.CalibrationModel.CalibrationSamplesInfo;
+            foreach (var info in infos)
             {
-                case CalibrationMode.ShowNotCalibrated: //start to collect samples
-                    SetMode(CalibrationMode.CollectingSamples);
-                    break;
+                var sample = new CalibrationSample(info);
+                _viewModel.Samples.Add(sample);
+            }
+        }
 
-                case CalibrationMode.CollectingSamples: //stop collect samples
-                    SetMode(CalibrationMode.ShowNotCalibrated);
-                    break;
+        //private void CalibrateClick(object sender, RoutedEventArgs e)
+        //{
+
+
+
+
+
+        //    //var button = (Button) sender;
+        //    //switch (_viewModel.Mode)
+        //    //{
+        //    //    case CalibrationMode.ShowNotCalibrated: //start to collect samples
+        //    //        SetMode(CalibrationMode.CollectingSamples);
+        //    //        break;
+
+        //    //    case CalibrationMode.CollectingSamples: //stop collect samples
+        //    //        SetMode(CalibrationMode.ShowNotCalibrated);
+        //    //        break;
                 
-                case CalibrationMode.ShowCalibrated: //reset result and start to collect samples again
-                    //_viewModel.CalibrationResult = null;
-                    //_viewModel.Mode = CalibrationMode.ShowNotCalibrated;
-                    //CalibrateClick(sender, e);
-                    break;
+        //    //    case CalibrationMode.ShowCalibrated: //reset result and start to collect samples again
+        //    //        //_viewModel.CalibrationResult = null;
+        //    //        //_viewModel.Mode = CalibrationMode.ShowNotCalibrated;
+        //    //        //CalibrateClick(sender, e);
+        //    //        break;
+        //    //}
+        //}
+
+        private void FindCornersClick(object sender, RoutedEventArgs e)
+        {
+            if (Model.Mode == SourceMode.Camera)
+            {
+            }
+            else
+            {
+                foreach (var sample in _viewModel.Samples)
+                {
+                    var corners = StereoCalibration.FindChessboardCorners(sample.StereoImage, _viewModel.PatternSize);
+                    if (corners == null) continue;
+                    StereoCalibration.DrawChessboardCorners(sample.StereoImage, corners);
+                    sample.IsCornersInitialized = true;
+                }
             }
         }
 
         private void LoadSamplesFromFile(object sender, RoutedEventArgs e)
         {
-            _flyout.IsOpen = true;
+            Flyout.IsOpen = true;
             return;
             var openFileDialog = new OpenFileDialog()
             {
@@ -101,7 +156,7 @@ namespace Adas.Ui.Wpf.Views
             //    var corners = StereoCalibration.FindChessboardCorners(stereoImage, _viewModel.Settings.PatternSize);
             //    if (corners == null) continue;
             //    StereoCalibration.DrawChessboardCorners(stereoImage, corners);
-            //    _viewModel.Samples.Add(new CalibratationSample(stereoImage, corners));
+            //    _viewModel.Samples.Add(new CalibrationSample(stereoImage, corners));
             //}
             //_viewModel.CalibrationResult = null;
             //_viewModel.Settings.Count = leftfiles.Length;
@@ -111,7 +166,7 @@ namespace Adas.Ui.Wpf.Views
 
         private void ProcessImages(object sender, EventArgs e)
         {
-            if (_controller.CameraIsEnabled())
+            if (Controller.CameraIsEnabled())
             {
                 var stereoImage = _model.StereoCamera.GetStereoImage();
                 ShowImage(SourceImage, stereoImage);
@@ -135,7 +190,7 @@ namespace Adas.Ui.Wpf.Views
                 //    showSample = true;
                 //    if (_viewModel.AllowSaveCorners)
                 //    {
-                //        _viewModel.Samples.Add(new CalibratationSample(stereoImage, corners));
+                //        _viewModel.Samples.Add(new CalibrationSample(stereoImage, corners));
                 //        _viewModel.InvalidateSamples = true;
                 //        if (_viewModel.Settings.Count == _viewModel.Samples.Count)
                 //        {
@@ -169,7 +224,7 @@ namespace Adas.Ui.Wpf.Views
         public void ShowImage(StereoImageControl control, StereoImage<Bgr, byte> image)
         {
             control.ViewModel.Image = image;
-            control.Refresh();
+            //control.Refresh();
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
@@ -229,6 +284,16 @@ namespace Adas.Ui.Wpf.Views
                     PropertiesGrid.IsEnabled = false;
                     SaveButton.IsEnabled = true;
                     break;
+            }
+        }
+
+        private void SampleList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                var sample = (CalibrationSample) e.AddedItems[0];
+                SourceImage.ViewModel.Image = sample.StereoImage;
+                //SourceImage.Refresh();
             }
         }
     }

@@ -1,47 +1,60 @@
 ﻿<Controls:MetroWindow x:Class="Adas.Ui.Wpf.Views.CalibrationWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Views="clr-namespace:Adas.Ui.Wpf.Views"
-        xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
-        Title="CalibrationWindow" Height="400" Width="600">
-  <Controls:MetroWindow.Flyouts>
-    <Controls:FlyoutsControl>
-      <Controls:Flyout Header="Flyout" Position="Right" Width="200" x:Name="_flyout">
-        <StackPanel>
-          <Grid x:Name="PropertiesGrid">
-            <Grid.RowDefinitions>
-              <RowDefinition />
-              <RowDefinition />
-              <RowDefinition />
-              <RowDefinition />
-              <RowDefinition />
-              <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="120" />
-              <ColumnDefinition />
-            </Grid.ColumnDefinitions>
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Views="clr-namespace:Adas.Ui.Wpf.Views"
+                      xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+                      Title="CalibrationWindow" Height="400" Width="600">
 
-            <Label Grid.Row="0" Grid.Column="0">Image Count</Label>
-            <Label Grid.Row="1" Grid.Column="0">Chessboard Height</Label>
-            <Label Grid.Row="2" Grid.Column="0">Chessboard Width</Label>
-            <Label Grid.Row="3" Grid.Column="0">Cell Height</Label>
-            <Label Grid.Row="4" Grid.Column="0">Cell Width</Label>
-            <Label Grid.Row="5" Grid.Column="0">Delay</Label>
+    <Controls:MetroWindow.Flyouts>
+        <Controls:FlyoutsControl>
+            <Controls:Flyout x:Name="Flyout" Header="Settings" Position="Right" Width="200" IsModal="True">
+                <StackPanel>
+                    <StackPanel.Resources>
+                        <Style TargetType="Label">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                        <Style TargetType="RowDefinition">
+                            <Setter Property="Height" Value="26" />
+                        </Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Margin" Value="3" />
+                        </Style>
+                    </StackPanel.Resources>
+                    <Grid x:Name="PropertiesGrid" Margin="15">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Settings.Count}" />
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=Settings.ChessboardHeight}" />
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=Settings.ChessboardWidth}" />
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=Settings.CellHeight}" />
-            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=Settings.CellWidth}" />
-            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=Delay}" />
+                        <Label Grid.Row="0" Grid.Column="0">Image Count</Label>
+                        <Label Grid.Row="1" Grid.Column="0">Chessboard Height</Label>
+                        <Label Grid.Row="2" Grid.Column="0">Chessboard Width</Label>
+                        <Label Grid.Row="3" Grid.Column="0">Cell Height</Label>
+                        <Label Grid.Row="4" Grid.Column="0">Cell Width</Label>
+                        <Label Grid.Row="5" Grid.Column="0">Delay</Label>
 
-          </Grid>
-        </StackPanel>
-      </Controls:Flyout>
-    </Controls:FlyoutsControl>
-  </Controls:MetroWindow.Flyouts>
-  <Grid>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Count}" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=ChessboardHeight}" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=ChessboardWidth}" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Path=CellHeight}" />
+                        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=CellWidth}" />
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=Delay}" />
+
+                    </Grid>
+                </StackPanel>
+            </Controls:Flyout>
+        </Controls:FlyoutsControl>
+    </Controls:MetroWindow.Flyouts>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition />
@@ -51,29 +64,22 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.RowSpan="2">
-            <StackPanel.Resources>
-                <Style TargetType="Label">
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                </Style>
-                <Style TargetType="RowDefinition">
-                    <Setter Property="Height" Value="26" />
-                </Style>
-                <Style TargetType="TextBox">
-                    <Setter Property="Margin" Value="3" />
-                </Style>
-            </StackPanel.Resources>
-            
-            <Label>Settings</Label>
-            
+        <Grid Grid.RowSpan="2" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <ListBox x:Name="SampleList" ItemsSource="{Binding Path=Samples}" SelectionChanged="SampleList_OnSelectionChanged"/>
+            <StackPanel Grid.Row="1">
 
-            <Button x:Name="ActionButton" Click="CalibrateClick">Getting Samples</Button>
-            <Button Click="LoadSamplesFromFile">Load Samples From Folder</Button>
+            <Button x:Name="ActionButton" Click="FindCornersClick" Margin="0,10,0,10">Find Corners</Button>
             <Button x:Name="SaveButton" Click="SaveClick" IsEnabled="False">Save</Button>
-    </StackPanel>
+            </StackPanel>
+        </Grid>   
+            
 
-        <Views:StereoImageControl x:Name="SourceImage" Grid.Row="0" Grid.Column="1"/>
-        <Views:StereoImageControl x:Name="ResultImage" Grid.Row="1" Grid.Column="1"/>
+        <Views:StereoImageControl x:Name="SourceImage" Grid.Row="0" Grid.Column="1" />
+        <Views:StereoImageControl x:Name="ResultImage" Grid.Row="1" Grid.Column="1" />
 
-  </Grid>
+    </Grid>
 </Controls:MetroWindow>

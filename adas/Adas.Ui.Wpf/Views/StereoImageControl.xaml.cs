@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,14 +27,31 @@ namespace Adas.Ui.Wpf.Views
             InitializeComponent();
             ViewModel = new StereoImageViewModel();
             DataContext = ViewModel;
-        }
 
+            ViewModel.PropertyChanged += ViewModelOnPropertyChanged;
+        }
+        
         public StereoImageViewModel ViewModel { get; private set; }
 
-        public void Refresh()
+        private void Refresh()
         {
-            LeftImageHolder.Source = ViewModel.Image.LeftImage.ToBitmap().ToBitmapSource();
-            RightImageHolder.Source = ViewModel.Image.RightImage.ToBitmap().ToBitmapSource();
+            if(ViewModel.ShowLeft)
+                LeftImageHolder.Source = ViewModel.Image.LeftImage.ToBitmap().ToBitmapSource();
+            else
+            {
+                LeftImageHolder.Source = null;
+            }
+            if(ViewModel.ShowRight)
+                RightImageHolder.Source = ViewModel.Image.RightImage.ToBitmap().ToBitmapSource();
+            else
+            {
+                RightImageHolder.Source = null;
+            }
+        }
+
+        private void ViewModelOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+        {
+            Refresh();
         }
     }
 }

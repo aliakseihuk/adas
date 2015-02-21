@@ -20,10 +20,11 @@
     <Image x:Name="LeftImageHolder" Grid.Row="1" Grid.Column="0" />
     <Image x:Name="RightImageHolder" Grid.Row="1" Grid.Column="1" />
     <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-      <Controls:ToggleSwitch OnLabel="Show" OffLabel="Hide" />
+      <Controls:ToggleSwitch Content="" IsChecked="{Binding Path=ShowLeft}"/>
     </StackPanel>
-    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-      <Controls:ToggleSwitch OnLabel="Show" OffLabel="Hide" />
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+            <Controls:ToggleSwitch Content="" IsChecked="{Binding Path=ShowRight}"/>
+        
     </StackPanel>
   </Grid>
 </UserControl>

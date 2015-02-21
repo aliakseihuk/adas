@@ -23,7 +23,7 @@ namespace Adas.Ui.Wpf
     public class CalibrationModel
     {
         public CalibrationStereoResult CalibrationResult { get; set; }
-        public StereoImageFileInfo[] CalibrationSamples { get; set; }
+        public StereoImageFileInfo[] CalibrationSamplesInfo { get; set; }
     }
 
     public enum SourceMode
