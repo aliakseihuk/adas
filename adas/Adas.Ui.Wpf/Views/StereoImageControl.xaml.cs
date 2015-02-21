@@ -21,8 +21,11 @@ namespace Adas.Ui.Wpf.Views
 
         private void Refresh()
         {
-            LeftImageHolder.Source = ViewModel.ShowLeft ? ViewModel.Image.LeftImage.ToBitmap().ToBitmapSource() : null;
-            RightImageHolder.Source = ViewModel.ShowRight
+            var hasImage = ViewModel.Image != null;
+            LeftImageHolder.Source = hasImage && ViewModel.ShowLeft
+                ? ViewModel.Image.LeftImage.ToBitmap().ToBitmapSource()
+                : null;
+            RightImageHolder.Source = hasImage && ViewModel.ShowRight
                 ? ViewModel.Image.RightImage.ToBitmap().ToBitmapSource()
                 : null;
         }

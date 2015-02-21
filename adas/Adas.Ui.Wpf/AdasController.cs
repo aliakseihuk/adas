@@ -25,10 +25,23 @@ namespace Adas.Ui.Wpf
             {
             }
         }
-
+        
         public bool CameraIsEnabled()
         {
             return Model.StereoCamera != null && Model.StereoCamera.IsEnabled;
+        }
+
+        public void SwapCameras()
+        {
+            if (CameraIsEnabled())
+                Model.StereoCamera.SwapCameras();
+        }
+
+        public void SetCameraResolution(string resolutionString)
+        {
+            var resolution =
+                (StereoCamera.Resolution) Enum.Parse(typeof (StereoCamera.Resolution), "r" + resolutionString, true);
+            Model.StereoCamera.SetResolution(resolution);
         }
     }
 }

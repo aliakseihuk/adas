@@ -50,6 +50,16 @@ namespace Adas.Ui.Wpf.Views.Setup
             switch (stage_)
             {
                 case Stage.SetupSource:
+                    if (Controller.Model.Mode == SourceMode.Camera)
+                    {
+                        GoToStage(Stage.SetupCameraParameters);
+                    }
+                    else
+                    {
+                        GoToStage(Stage.SelectCalibration);
+                    }
+                    break;
+                case Stage.SetupCameraParameters:
                     GoToStage(Stage.SelectCalibration);
                     break;
                 case Stage.SelectCalibration:
@@ -68,6 +78,9 @@ namespace Adas.Ui.Wpf.Views.Setup
             {
                 case Stage.SetupSource:
                     _controlHolder.Children.Add(new SetupSourceControl(this));
+                    break;
+                case Stage.SetupCameraParameters:
+                    _controlHolder.Children.Add(new SetupCameraParametersControl(this));
                     break;
                 case Stage.SelectCalibration:
                     _controlHolder.Children.Add(new SetupCalibrationControl(this));

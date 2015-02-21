@@ -3,8 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" d:DesignHeight="200" d:DesignWidth="400">
+   <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -19,11 +22,11 @@
         <Label Grid.Row="0" Grid.Column="1" Content="{Binding Path=Title2}" Foreground="White" />
         <Image x:Name="LeftImageHolder" Grid.Row="1" Grid.Column="0" />
         <Image x:Name="RightImageHolder" Grid.Row="1" Grid.Column="1" />
-        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-            <Controls:ToggleSwitch Content="" IsChecked="{Binding Path=ShowLeft}" />
+        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Visibility="{Binding Path=ShowCustomize, Converter={StaticResource BoolToVisibility}}">
+            <controls:ToggleSwitch Content="" IsChecked="{Binding Path=ShowLeft}" />
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
-            <Controls:ToggleSwitch Content="" IsChecked="{Binding Path=ShowRight}" />
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Visibility="{Binding Path=ShowCustomize, Converter={StaticResource BoolToVisibility}}">
+            <controls:ToggleSwitch Content="" IsChecked="{Binding Path=ShowRight}" />
         </StackPanel>
     </Grid>
 </UserControl>

@@ -32,6 +32,7 @@ namespace Adas.Ui.Wpf.ViewModels
     public enum Stage
     {
         SetupSource,
+        SetupCameraParameters,
         SelectCalibration,
         Calibrate,
     }

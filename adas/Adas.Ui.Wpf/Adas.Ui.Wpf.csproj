@@ -75,6 +75,9 @@
     <Compile Include="Views\Setup\SetupCalibrationControl.xaml.cs">
       <DependentUpon>SetupCalibrationControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Setup\SetupCameraParametersControl.xaml.cs">
+      <DependentUpon>SetupCameraParametersControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Setup\SetupSourceControl.xaml.cs">
       <DependentUpon>SetupSourceControl.xaml</DependentUpon>
     </Compile>
@@ -108,6 +111,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\Setup\SetupCalibrationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Setup\SetupCameraParametersControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

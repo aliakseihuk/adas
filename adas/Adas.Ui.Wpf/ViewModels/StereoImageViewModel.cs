@@ -12,11 +12,13 @@ namespace Adas.Ui.Wpf.ViewModels
 
         private bool _showLeft;
         private bool _showRight;
+        private bool _showCustomize;
 
         public StereoImageViewModel()
         {
             _showLeft = true;
             _showRight = true;
+            _showCustomize = true;
         }
 
         public StereoImage<Bgr, byte> Image
@@ -52,7 +54,16 @@ namespace Adas.Ui.Wpf.ViewModels
             }
         }
 
-        public bool ShowCustomize { get; set; }
+        public bool ShowCustomize
+        {
+            get { return _showCustomize; }
+            set
+            {
+                if (_showCustomize == value) return;
+                _showCustomize = value;
+                OnPropertyChanged();
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

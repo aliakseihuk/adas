@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="Adas.Ui.Wpf.Views.Setup.SetupCameraParametersControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:views="clr-namespace:Adas.Ui.Wpf.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="220" d:DesignWidth="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="105"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel>
+            <GroupBox Header="Resolution">
+                <StackPanel>
+                    <RadioButton GroupName="resolution" Margin="3" Checked="ResolutionChecked">320x240</RadioButton>
+                    <RadioButton GroupName="resolution" Margin="3" IsChecked="True" Checked="ResolutionChecked">640x480</RadioButton>
+                    <RadioButton GroupName="resolution" Margin="3" Checked="ResolutionChecked">800x600</RadioButton>
+                    <RadioButton GroupName="resolution" Margin="3" Checked="ResolutionChecked">1280x720</RadioButton>
+                </StackPanel>
+            </GroupBox>
+            <Button Margin="5" Click="SwapClick">Swap</Button>
+            <Button Margin="5" Click="NextClick">Next</Button>
+        </StackPanel>
+        
+        <views:StereoImageControl x:Name="CameraView" Grid.Row="0" Grid.Column="1"/>
+    
+    </Grid>
+</UserControl>
