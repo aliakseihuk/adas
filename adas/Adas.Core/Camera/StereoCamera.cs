@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using DirectShowLib;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -9,6 +10,14 @@ namespace Adas.Core.Camera
 {
     public class StereoCamera
     {
+        public enum Resolution
+        {
+            R320X240,
+            R640X480,
+            R800X600,
+            R1280X720
+        }
+
         private readonly Capture[] _captures = new Capture[2];
 
         public bool IsEnabled { get; private set; }
@@ -98,41 +107,5 @@ namespace Adas.Core.Camera
         {
             return _captures[capture].QueryFrame();
         }
-    }
-
-    public class StereoImage<TColor, TDepth>
-        where TColor : struct, IColor
-        where TDepth : new()
-    {
-        public Image<TColor, TDepth> LeftImage { get; set; }
-        public Image<TColor, TDepth> RightImage { get; set; }
-
-        public StereoImage<TOtherColor, TOtherDepth> Convert<TOtherColor, TOtherDepth>()
-            where TOtherColor : struct, IColor
-            where TOtherDepth : new()
-        {
-            return new StereoImage<TOtherColor, TOtherDepth>
-            {
-                LeftImage = LeftImage.Convert<TOtherColor, TOtherDepth>(),
-                RightImage = RightImage.Convert<TOtherColor, TOtherDepth>()
-            };
-        }
-
-        public StereoImage<TColor, TDepth> Copy()
-        {
-            return new StereoImage<TColor, TDepth>
-            {
-                LeftImage = LeftImage.Copy(),
-                RightImage = RightImage.Copy()
-            };
-        }
-    }
-    
-    public enum Resolution
-    {
-        R320X240,
-        R640X480,
-        R800X600,
-        R1280X720
     }
 }

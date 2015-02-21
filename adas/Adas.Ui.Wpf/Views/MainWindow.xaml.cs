@@ -1,10 +1,13 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Xml.Serialization;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
+using Microsoft.Win32;
 
 namespace Adas.Ui.Wpf.Views
 {
@@ -28,14 +31,12 @@ namespace Adas.Ui.Wpf.Views
             _dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
             _dispatcherTimer.Tick += ProcessImages;
         }
-
         
-
         private void ProcessImages(object sender, EventArgs e)
         {
             var stereoImage = _model.StereoCamera.GetStereoImage();
-            LeftImageHolder.Source = stereoImage.LeftImage.ToBitmap().ToBitmapSource();
-            RightImageHolder.Source = stereoImage.RightImage.ToBitmap().ToBitmapSource();
+            SourceImage.ViewModel.Image = stereoImage;
+            SourceImage.Refresh();
         }
 
         private void ActionClick(object sender, RoutedEventArgs e)
@@ -69,13 +70,15 @@ namespace Adas.Ui.Wpf.Views
                 {
                     childItem.IsEnabled = true;
                 }
+                SourceImage.ViewModel.Title1 = "Camera 1";
+                SourceImage.ViewModel.Title2 = "Camera 2";
             }
         }
 
         private void CameraResolutionClick(object sender, RoutedEventArgs e)
         {
             var item = (MenuItem)sender;
-            var resolution = (Resolution) Enum.Parse(typeof (Resolution), "r" + item.Header, true);
+            var resolution = (StereoCamera.Resolution) Enum.Parse(typeof (StereoCamera.Resolution), "r" + item.Header, true);
             _model.StereoCamera.SetResolution(resolution);
         }
 
@@ -86,13 +89,24 @@ namespace Adas.Ui.Wpf.Views
 
         private void CameraMakeCalibrationClick(object sender, RoutedEventArgs e)
         {
-            var calibrateWindow = new CalibrationWindow(_model);
-            calibrateWindow.ShowDialog();
+            //var calibrateWindow = new CalibrationWindow(_model);
+            //calibrateWindow.ShowDialog();
         }
 
         private void CameraLoadCalibrationClick(object sender, RoutedEventArgs e)
         {
-
+            var opendialog = new OpenFileDialog();
+            opendialog.DefaultExt = "config";
+            opendialog.Filter = "Calibration Files(*.calib)|*.calib|All files (*.*)|*.*";
+            opendialog.InitialDirectory = Directory.GetCurrentDirectory();
+            if (opendialog.ShowDialog() == true)
+            {
+                var mySerializer = new XmlSerializer(typeof (CalibrationStereoResult));
+                using (var myFileStream = new FileStream(opendialog.FileName, FileMode.Open))
+                {
+                    _model.CalibrationModel.CalibrationResult = (CalibrationStereoResult)mySerializer.Deserialize(myFileStream);
+                }
+            }
         }
 
         #endregion //Camera Items

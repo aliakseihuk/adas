@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfStereoImageInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <StereoImageInfo>
+    <Name>Image1</Name>
+    <LeftImageFile>left_image1_path</LeftImageFile>
+    <RightImageFile>right_image1_path</RightImageFile>
+  </StereoImageInfo>
+  <StereoImageInfo>
+    <Name>Image2</Name>
+    <LeftImageFile>left_image2_path</LeftImageFile>
+    <RightImageFile>right_image2_path</RightImageFile>
+  </StereoImageInfo>
+</ArrayOfStereoImageInfo>
