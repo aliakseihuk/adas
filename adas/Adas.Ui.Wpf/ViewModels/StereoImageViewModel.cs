@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.Annotations;
 using Emgu.CV.Structure;
 
 namespace Adas.Ui.Wpf.ViewModels
 {
-    public class StereoImageViewModel: INotifyPropertyChanged
+    public class StereoImageViewModel : INotifyPropertyChanged
     {
         private StereoImage<Bgr, byte> _image;
-        
+
         private bool _showLeft;
         private bool _showRight;
 
@@ -35,7 +30,8 @@ namespace Adas.Ui.Wpf.ViewModels
             }
         }
 
-        public bool ShowLeft {
+        public bool ShowLeft
+        {
             get { return _showLeft; }
             set
             {
@@ -44,6 +40,7 @@ namespace Adas.Ui.Wpf.ViewModels
                 OnPropertyChanged();
             }
         }
+
         public bool ShowRight
         {
             get { return _showRight; }
@@ -62,7 +59,7 @@ namespace Adas.Ui.Wpf.ViewModels
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            var handler = PropertyChanged;
+            PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalibrationStereoResult xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Settings>
+    <Count>20</Count>
+    <ChessboardHeight>6</ChessboardHeight>
+    <ChessboardWidth>9</ChessboardWidth>
+    <CellWidth>20</CellWidth>
+    <CellHeight>20</CellHeight>
+    <ImageSize>
+      <Width>640</Width>
+      <Height>480</Height>
+    </ImageSize>
+  </Settings>
+  <Camera1Result>
+    <IntrinsicParameters>
+      <DistortionCoeffs Rows="8" Cols="1" NumberOfChannels="1" CompressionRatio="0">
+        <Bytes>8tWnHqghtT+hqGfJLajev+DG+pz/L0c/ReXAyT7Pez9e/K+C534DQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==</Bytes>
+      </DistortionCoeffs>
+      <IntrinsicMatrix Rows="3" Cols="3" NumberOfChannels="1" CompressionRatio="0">
+        <Bytes>alxbFhcJikAAAAAAAAAAAJK+SBMd2HVAAAAAAAAAAACYOnQCLyuKQBsmpw/Lu29AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPA/</Bytes>
+      </IntrinsicMatrix>
+    </IntrinsicParameters>
+    <R Rows="3" Cols="3" NumberOfChannels="1" CompressionRatio="0">
+      <Bytes>2p1dQYUk7z9HdpEshrupv6lPel0GuMw/O5CRqeysqT+ogjEUifXvPzMH7EuYY3k/7Lv9bNe4zL/yS4eyd2B1PwgCpKr7Lu8/</Bytes>
+    </R>
+    <P Rows="3" Cols="4" NumberOfChannels="1" CompressionRatio="0">
+      <Bytes>gtKwbOJ5kEAAAAAAAAAAAAAAAMB6cmBAAAAAAAAAAAAAAAAAAAAAAILSsGzieZBAAAAAGLuob0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwPwAAAAAAAAAA</Bytes>
+    </P>
+    <Rectangle>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>640</Width>
+        <Height>480</Height>
+      </Size>
+      <X>0</X>
+      <Y>0</Y>
+      <Width>640</Width>
+      <Height>480</Height>
+    </Rectangle>
+  </Camera1Result>
+  <Camera2Result>
+    <IntrinsicParameters>
+      <DistortionCoeffs Rows="8" Cols="1" NumberOfChannels="1" CompressionRatio="0">
+        <Bytes>MpI4f0PslD8U1mfUKXPAP4o9F0wQ20G/2NlPMTFUYT9xdORxj5LgvwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==</Bytes>
+      </DistortionCoeffs>
+      <IntrinsicMatrix Rows="3" Cols="3" NumberOfChannels="1" CompressionRatio="0">
+        <Bytes>wBJ2DdXRiUAAAAAAAAAAAPkc1jKoGXVAAAAAAAAAAADEhOJN8uOJQCRP9B9Il29AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPA/</Bytes>
+      </IntrinsicMatrix>
+    </IntrinsicParameters>
+    <R Rows="3" Cols="3" NumberOfChannels="1" CompressionRatio="0">
+      <Bytes>GpCgA2d87z+jHbwn3JDCP1zjSG7HpLo/SCDgxSuPwr8U4AbKKKnvP0R2PlN9l4C/fEcL+Xupur94jiM+ECl9v9yWEbc90+8/</Bytes>
+    </R>
+    <P Rows="3" Cols="4" NumberOfChannels="1" CompressionRatio="0">
+      <Bytes>gtKwbOJ5kEAAAAAAAAAAAAAAAOD/GW5AwHbpOiq2/8AAAAAAAAAAAILSsGzieZBAAAAAGLuob0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwPwAAAAAAAAAA</Bytes>
+    </P>
+    <Rectangle>
+      <Location>
+        <X>0</X>
+        <Y>0</Y>
+      </Location>
+      <Size>
+        <Width>640</Width>
+        <Height>480</Height>
+      </Size>
+      <X>0</X>
+      <Y>0</Y>
+      <Width>640</Width>
+      <Height>480</Height>
+    </Rectangle>
+  </Camera2Result>
+  <Q Rows="4" Cols="4" NumberOfChannels="1" CompressionRatio="0">
+    <Bytes>AAAAAAAA8D8AAAAAAAAAAAAAAAAAAAAAAAAAwHpyYMAAAAAAAAAAAAAAAAAAAPA/AAAAAAAAAAAAAAAYu6hvwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAILSsGzieZBAAAAAAAAAAAAAAAAAAAAAANqykQ0/oIA/5EHhRIxg7D8=</Bytes>
+  </Q>
+</CalibrationStereoResult>

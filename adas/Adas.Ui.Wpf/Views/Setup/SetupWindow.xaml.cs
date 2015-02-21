@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Adas.Ui.Wpf.Annotations;
 using Adas.Ui.Wpf.ViewModels;
+using Adas.Ui.Wpf.Views.Calibration;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
@@ -77,6 +78,7 @@ namespace Adas.Ui.Wpf.Views.Setup
                     Close();
                     break;
             }
+            SetMessage(string.Empty);
         }
     }
 

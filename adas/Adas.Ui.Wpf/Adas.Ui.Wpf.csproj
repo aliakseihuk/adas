@@ -71,6 +71,7 @@
     <Compile Include="ViewModels\SetupViewModel.cs" />
     <Compile Include="ViewModels\StereoImageViewModel.cs" />
     <Compile Include="AdasController.cs" />
+    <Compile Include="Views\Calibration\CalibrationWindow.ImageMode.cs" />
     <Compile Include="Views\Setup\SetupCalibrationControl.xaml.cs">
       <DependentUpon>SetupCalibrationControl.xaml</DependentUpon>
     </Compile>
@@ -83,7 +84,7 @@
     <Compile Include="Views\StereoImageControl.xaml.cs">
       <DependentUpon>StereoImageControl.xaml</DependentUpon>
     </Compile>
-    <Page Include="Views\CalibrationWindow.xaml">
+    <Page Include="Views\Calibration\CalibrationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -98,7 +99,7 @@
     </Compile>
     <Compile Include="BitmapExtensions.cs" />
     <Compile Include="ViewModels\CalibrationViewModel.cs" />
-    <Compile Include="Views\CalibrationWindow.xaml.cs">
+    <Compile Include="Views\Calibration\CalibrationWindow.xaml.cs">
       <DependentUpon>CalibrationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ComputeModel.cs" />
@@ -148,6 +149,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <Compile Include="Views\Calibration\CalibrationWindow.CameraMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

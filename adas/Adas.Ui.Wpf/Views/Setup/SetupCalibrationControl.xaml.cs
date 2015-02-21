@@ -59,6 +59,7 @@ namespace Adas.Ui.Wpf.Views.Setup
                 Model.CalibrationModel.CalibrationResult =
                     SerializationHelper<CalibrationStereoResult>.XmlDeserialize(opendialog.FileName);
             }
+            CalibrateClick(null, null);
         }
 
         private void LoadSamplesClick(object sender, RoutedEventArgs e)

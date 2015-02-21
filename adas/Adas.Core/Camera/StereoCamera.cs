@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using DirectShowLib;
@@ -42,14 +43,13 @@ namespace Adas.Core.Camera
             }
             return IsEnabled;
         }
-
         
-
         public StereoImage<Bgr, byte> GetStereoImage()
         {
             if (!IsEnabled) return null;
             return new StereoImage<Bgr, byte>
             {
+                Name = DateTime.Now.ToString("o"),
                 LeftImage = GetFrame(0),
                 RightImage = GetFrame(1)
             };

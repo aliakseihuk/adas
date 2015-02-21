@@ -16,7 +16,7 @@ namespace Adas.Core.Camera
             {
                 Name = fileInfo.Name,
                 LeftImage = new Image<TColor, TDepth>(fileInfo.LeftImagePath),
-                RightImage = new Image<TColor, TDepth>(fileInfo.LeftImagePath),
+                RightImage = new Image<TColor, TDepth>(fileInfo.RightImagePath),
             };
         }
 
@@ -35,6 +35,7 @@ namespace Adas.Core.Camera
         {
             return new StereoImage<TColor, TDepth>
             {
+                Name = Name,
                 LeftImage = LeftImage.Copy(),
                 RightImage = RightImage.Copy()
             };
