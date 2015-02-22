@@ -1,4 +1,5 @@
 ﻿using Emgu.CV;
+using Emgu.CV.Structure;
 
 namespace Adas.Core.Camera
 {
@@ -40,10 +41,26 @@ namespace Adas.Core.Camera
                 RightImage = RightImage.Copy()
             };
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     public class StereoImageFileInfo
     {
+        public StereoImageFileInfo()
+        {
+        }
+
+        public StereoImageFileInfo(StereoImage<Bgr, byte> image)
+        {
+            Name = image.Name;
+            LeftImagePath = string.Format("left_{0}.png", Name);
+            RightImagePath = string.Format("right_{0}.png", Name);
+        }
+
         public string Name { get; set; }
         public string LeftImagePath { get; set; }
         public string RightImagePath { get; set; }

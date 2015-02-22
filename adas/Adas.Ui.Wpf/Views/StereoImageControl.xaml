@@ -24,9 +24,11 @@
         <Image x:Name="RightImageHolder" Grid.Row="1" Grid.Column="1" />
         <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Visibility="{Binding Path=ShowCustomize, Converter={StaticResource BoolToVisibility}}">
             <controls:ToggleSwitch Content="" IsChecked="{Binding Path=ShowLeft}" />
+            <Button Click="RotateLeft" Height="25">Rotate</Button>
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Visibility="{Binding Path=ShowCustomize, Converter={StaticResource BoolToVisibility}}">
             <controls:ToggleSwitch Content="" IsChecked="{Binding Path=ShowRight}" />
+            <Button Click="RotateRight" Height="25" >Rotate</Button>
         </StackPanel>
     </Grid>
 </UserControl>

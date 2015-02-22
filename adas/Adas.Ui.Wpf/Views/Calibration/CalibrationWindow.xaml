@@ -75,7 +75,7 @@
                 <Label x:Name="CollectedCount" />
                 <Button x:Name="ActionButton" Click="ActionClick" Margin="0,5,0,5">Action</Button>
                 <Button x:Name="SaveButton" Click="SaveClick" Margin="0,5,0,5">Save</Button>
-                <Button x:Name="StartButton" Click="SaveClick" Margin="0,5,0,5">Start</Button>
+                <Button x:Name="StartButton" Click="StartClick" Margin="0,5,0,5">Start</Button>
             </StackPanel>
         </Grid>
         

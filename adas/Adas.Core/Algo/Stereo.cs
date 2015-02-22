@@ -76,7 +76,12 @@ namespace Adas.Core.Algo
         public int SadWindowSize
         {
             get { return _sadWindowSize; }
-            set { _sadWindowSize = value > 0 ? value - (value%2) : 1; }
+            set
+            {
+                _sadWindowSize = value > 0
+                    ? (value%2 == 0 ? value + 1 : value)
+                    : 1;
+            }
         }
 
         /// <summary>

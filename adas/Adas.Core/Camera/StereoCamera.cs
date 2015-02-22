@@ -49,7 +49,7 @@ namespace Adas.Core.Camera
             if (!IsEnabled) return null;
             return new StereoImage<Bgr, byte>
             {
-                Name = DateTime.Now.ToString("o"),
+                Name = DateTime.Now.Ticks.ToString(),
                 LeftImage = GetFrame(0),
                 RightImage = GetFrame(1)
             };

@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using Adas.Core;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
+using Emgu.CV;
 using Emgu.CV.Structure;
 using Microsoft.Win32;
 
@@ -107,6 +108,14 @@ namespace Adas.Ui.Wpf.Views.Calibration
                 ImageSize = _viewModel.Samples[0].StereoImage.LeftImage.Size
             };
             _viewModel.CalibrationResult = StereoCalibration.Calibrate(settings, samples);
+        }
+
+        private void StartClick(object sender, RoutedEventArgs e)
+        {
+            Controller.Model.CalibrationModel.CalibrationResult = _viewModel.CalibrationResult;
+            var mainwindow = new MainWindow(Controller);
+            mainwindow.Show();
+            Close();
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)

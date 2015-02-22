@@ -68,8 +68,8 @@ namespace Adas.Ui.Wpf.Views.Setup
             {
                 DefaultExt = "sti",
                 Filter = "Stereo images Files(*.sti)|*.sti|All files (*.*)|*.*",
-                //InitialDirectory = Directory.GetCurrentDirectory(),
-                InitialDirectory = @"e:\adas\Adas\Adas.Core\Data\"
+                InitialDirectory = Directory.GetCurrentDirectory(),
+                //InitialDirectory = @"e:\adas\Adas\Adas.Core\Data\"
             };
 
             if (opendialog.ShowDialog() == true)

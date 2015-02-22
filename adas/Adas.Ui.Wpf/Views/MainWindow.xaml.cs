@@ -5,8 +5,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using Adas.Core.Algo;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
+using Emgu.CV.Structure;
 using Microsoft.Win32;
 
 namespace Adas.Ui.Wpf.Views
@@ -17,101 +19,91 @@ namespace Adas.Ui.Wpf.Views
     public partial class MainWindow
     {
         private readonly MainViewModel _viewModel;
-        private readonly AdasModel _model;
         private readonly DispatcherTimer _dispatcherTimer;
 
-        public MainWindow()
+        public MainWindow(AdasController controller)
         {
+            Controller = controller;
             InitializeComponent();
 
-            _model = new AdasModel();
             _viewModel = new MainViewModel();
             
             DataContext = _viewModel;
             _dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
             _dispatcherTimer.Tick += ProcessImages;
         }
+
+        private AdasController Controller { get; set; }
+
+        private AdasModel Model
+        {
+            get { return Controller.Model; }
+        }
         
         private void ProcessImages(object sender, EventArgs e)
         {
-            var stereoImage = _model.StereoCamera.GetStereoImage();
-            SourceImage.ViewModel.Image = stereoImage;
-            //SourceImage.Refresh();
+            if (Controller.CameraIsEnabled())
+            {
+                var image = Controller.GetCalibratedStereoImage();
+                SourceImage.ViewModel.Image = image;
+
+                var temp = new StereoImage<Gray, byte>();
+
+                if (ResultImage.ViewModel.ShowLeft)
+                {
+                    var model = (StereoSgbmModel) _viewModel.SgbmModel.Clone();
+                    model.Image1 = image.LeftImage.Convert<Gray, byte>();
+                    model.Image2 = image.RightImage.Convert<Gray, byte>();
+                    var map = Stereo.Compute(model);
+
+                    temp.LeftImage = map;
+                    temp.RightImage = map;
+                    
+                }
+                if (ResultImage.ViewModel.ShowRight)
+                {
+                    var model = (OpticalFlowModel)_viewModel.FlowModel.Clone();
+                    model.Image1 = image.LeftImage.Convert<Gray, byte>();
+                    model.Image2 = image.RightImage.Convert<Gray, byte>();
+                    var map = OpticalFlow.Compute(model);
+                    temp.RightImage = map.Convert<Gray, byte>();
+                }
+                ResultImage.ViewModel.Image = temp.Convert<Bgr, byte>();
+
+                if (_viewModel.SaveImage)
+                {
+                    if (_viewModel.AllowGrabImage)
+                    {
+                        _viewModel.Images.Add(image);
+                        ImageListBox.Items.Refresh();
+                    }
+                    if (_viewModel.AllowSaveImages)
+                    {
+                        Controller.SaveImages(_viewModel.Images, DateTime.Now.Ticks.ToString());
+                        _viewModel.Images.Clear();
+                        ImageListBox.Items.Refresh();
+                    }
+                }
+            }
         }
 
         private void ActionClick(object sender, RoutedEventArgs e)
         {
-            if (!_model.StereoCamera.IsEnabled) return;
+            _dispatcherTimer.Start();
+            //if (!_model.StereoCamera.IsEnabled) return;
 
-            if (!_viewModel.IsRunCamera)
-            {
-                ActionButton.Content = "Stop Camera";
-                _dispatcherTimer.Start();
-            }
-            else
-            {
-                ActionButton.Content = "Run Camera";
-                _dispatcherTimer.Stop();
-            }
+            //if (!_viewModel.IsRunCamera)
+            //{
+            //    ActionButton.Content = "Stop Camera";
+            //    _dispatcherTimer.Start();
+            //}
+            //else
+            //{
+            //    ActionButton.Content = "Run Camera";
+            //    _dispatcherTimer.Stop();
+            //}
 
-            _viewModel.IsRunCamera = !_viewModel.IsRunCamera;
+            //_viewModel.IsRunCamera = !_viewModel.IsRunCamera;
         }
-
-        #region Camera Items
-
-        private void CameraInitializeClick(object sender, RoutedEventArgs e)
-        {
-            var item = (MenuItem) sender;
-            _model.StereoCamera.Init();
-            if (_model.StereoCamera.IsEnabled)
-            {
-                item.Header = "Reinitialize";
-                foreach (var childItem in CameraItem.Items.OfType<MenuItem>())
-                {
-                    childItem.IsEnabled = true;
-                }
-
-                //SourceImage.ViewModel.Title1 = "Camera 1";
-                //SourceImage.ViewModel.ShowRight = "Camera 2";
-            }
-        }
-
-        private void CameraResolutionClick(object sender, RoutedEventArgs e)
-        {
-            var item = (MenuItem)sender;
-            var resolution = (StereoCamera.Resolution) Enum.Parse(typeof (StereoCamera.Resolution), "r" + item.Header, true);
-            _model.StereoCamera.SetResolution(resolution);
-        }
-
-        private void CameraSwapClick(object sender, RoutedEventArgs e)
-        {
-            _model.StereoCamera.SwapCameras();
-        }
-
-        private void CameraMakeCalibrationClick(object sender, RoutedEventArgs e)
-        {
-            //var calibrateWindow = new CalibrationWindow(_model);
-            //calibrateWindow.ShowDialog();
-        }
-
-        private void CameraLoadCalibrationClick(object sender, RoutedEventArgs e)
-        {
-            var opendialog = new OpenFileDialog();
-            opendialog.DefaultExt = "config";
-            opendialog.Filter = "Calibration Files(*.calib)|*.calib|All files (*.*)|*.*";
-            opendialog.InitialDirectory = Directory.GetCurrentDirectory();
-            if (opendialog.ShowDialog() == true)
-            {
-                var mySerializer = new XmlSerializer(typeof (CalibrationStereoResult));
-                using (var myFileStream = new FileStream(opendialog.FileName, FileMode.Open))
-                {
-                    _model.CalibrationModel.CalibrationResult = (CalibrationStereoResult)mySerializer.Deserialize(myFileStream);
-                }
-            }
-        }
-
-        #endregion //Camera Items
-
-        
     }
 }
