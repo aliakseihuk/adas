@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using Adas.Core;
 using Adas.Core.Algo;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
@@ -29,7 +30,7 @@ namespace Adas.Ui.Wpf.Views
             _viewModel = new MainViewModel();
             
             DataContext = _viewModel;
-            _dispatcherTimer = new DispatcherTimer(DispatcherPriority.Background);
+            _dispatcherTimer = new DispatcherTimer(DispatcherPriority.ApplicationIdle);
             _dispatcherTimer.Tick += ProcessImages;
         }
 
@@ -42,54 +43,71 @@ namespace Adas.Ui.Wpf.Views
         
         private void ProcessImages(object sender, EventArgs e)
         {
-            if (Controller.CameraIsEnabled())
+            StereoImage<Bgr, byte> image = null;
+            if (Model.Mode == SourceMode.Camera)
             {
-                var image = Controller.GetCalibratedStereoImage();
-                SourceImage.ViewModel.Image = image;
-
-                var temp = new StereoImage<Gray, byte>();
-
-                if (ResultImage.ViewModel.ShowLeft)
+                if (Controller.CameraIsEnabled())
                 {
-                    var model = (StereoSgbmModel) _viewModel.SgbmModel.Clone();
-                    model.Image1 = image.LeftImage.Convert<Gray, byte>();
-                    model.Image2 = image.RightImage.Convert<Gray, byte>();
-                    var map = Stereo.Compute(model);
+                    //image = Controller.GeatedStereoImage();
+                }
+            }
+            else
+            {
+                if (Model.Image != null)
+                {
+                    image = Model.Image;
+                }
+            }
 
-                    temp.LeftImage = map;
-                    temp.RightImage = map;
+            if (image == null)
+                return;
+
+            SourceImage.ViewModel.Image = image;
+            var temp = new StereoImage<Gray, byte>();
+
+            if (ResultImage.ViewModel.ShowLeft)
+            {
+                var model = (StereoSgbmModel) _viewModel.SgbmModel.Clone();
+                model.Image1 = image.LeftImage.Convert<Gray, byte>();
+                model.Image2 = image.RightImage.Convert<Gray, byte>();
+                var map = Stereo.Compute(model);
+
+                temp.LeftImage = map;
+                temp.RightImage = map;
                     
-                }
-                if (ResultImage.ViewModel.ShowRight)
-                {
-                    var model = (OpticalFlowModel)_viewModel.FlowModel.Clone();
-                    model.Image1 = image.LeftImage.Convert<Gray, byte>();
-                    model.Image2 = image.RightImage.Convert<Gray, byte>();
-                    var map = OpticalFlow.Compute(model);
-                    temp.RightImage = map.Convert<Gray, byte>();
-                }
-                ResultImage.ViewModel.Image = temp.Convert<Bgr, byte>();
+            }
+            if (ResultImage.ViewModel.ShowRight)
+            {
+                var model = (OpticalFlowModel)_viewModel.FlowModel.Clone();
+                model.Image1 = image.LeftImage.Convert<Gray, byte>();
+                model.Image2 = image.RightImage.Convert<Gray, byte>();
+                var map = OpticalFlow.Compute(model);
+                temp.RightImage = map.Convert<Gray, byte>();
+                if (temp.LeftImage == null)
+                    temp.LeftImage = temp.RightImage;
+            }
+            ResultImage.ViewModel.Image = temp.Convert<Bgr, byte>();
 
-                if (_viewModel.SaveImage)
+            if (_viewModel.SaveImage)
+            {
+                if (_viewModel.AllowGrabImage)
                 {
-                    if (_viewModel.AllowGrabImage)
-                    {
-                        _viewModel.Images.Add(image);
-                        ImageListBox.Items.Refresh();
-                    }
-                    if (_viewModel.AllowSaveImages)
-                    {
-                        Controller.SaveImages(_viewModel.Images, DateTime.Now.Ticks.ToString());
-                        _viewModel.Images.Clear();
-                        ImageListBox.Items.Refresh();
-                    }
+                    _viewModel.Images.Add(image);
+                    ImageListBox.Items.Refresh();
+                }
+                if (_viewModel.AllowSaveImages)
+                {
+                    Controller.SaveImages(_viewModel.Images, DateTime.Now.Ticks.ToString());
+                    _viewModel.Images.Clear();
+                    ImageListBox.Items.Refresh();
                 }
             }
         }
 
         private void ActionClick(object sender, RoutedEventArgs e)
         {
-            _dispatcherTimer.Start();
+            if(!_dispatcherTimer.IsEnabled)
+                _dispatcherTimer.Start();
             //if (!_model.StereoCamera.IsEnabled) return;
 
             //if (!_viewModel.IsRunCamera)
@@ -104,6 +122,15 @@ namespace Adas.Ui.Wpf.Views
             //}
 
             //_viewModel.IsRunCamera = !_viewModel.IsRunCamera;
+        }
+
+        private void OpenClick(object sender, RoutedEventArgs e)
+        {
+            var infos = Controller.LoadStereoImageFileInfos();
+            if (infos != null)
+            {
+                Model.Image = StereoImage<Bgr, byte>.Load(infos.First());
+            }
         }
     }
 }

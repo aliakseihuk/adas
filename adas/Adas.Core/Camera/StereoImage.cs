@@ -1,4 +1,6 @@
-﻿using Emgu.CV;
+﻿using System.IO;
+using System.Xml.Serialization;
+using Emgu.CV;
 using Emgu.CV.Structure;
 
 namespace Adas.Core.Camera
@@ -13,11 +15,11 @@ namespace Adas.Core.Camera
 
         public static StereoImage<TColor, TDepth> Load(StereoImageFileInfo fileInfo)
         {
-            return new StereoImage<TColor, TDepth>()
+            return new StereoImage<TColor, TDepth>
             {
                 Name = fileInfo.Name,
-                LeftImage = new Image<TColor, TDepth>(fileInfo.LeftImagePath),
-                RightImage = new Image<TColor, TDepth>(fileInfo.RightImagePath),
+                LeftImage = new Image<TColor, TDepth>(Path.Combine(fileInfo.BasePath, fileInfo.LeftImagePath)),
+                RightImage = new Image<TColor, TDepth>(Path.Combine(fileInfo.BasePath, fileInfo.RightImagePath)),
             };
         }
 
@@ -50,6 +52,7 @@ namespace Adas.Core.Camera
 
     public class StereoImageFileInfo
     {
+        //constructor for serialization
         public StereoImageFileInfo()
         {
         }
@@ -64,5 +67,8 @@ namespace Adas.Core.Camera
         public string Name { get; set; }
         public string LeftImagePath { get; set; }
         public string RightImagePath { get; set; }
+
+        [XmlIgnore]
+        public string BasePath { get; set; }
     }
 }

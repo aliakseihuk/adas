@@ -1,21 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using Adas.Ui.Wpf.Annotations;
-using Adas.Ui.Wpf.ViewModels;
+﻿using Adas.Ui.Wpf.ViewModels;
 using Adas.Ui.Wpf.Views.Calibration;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
 
 namespace Adas.Ui.Wpf.Views.Setup
 {
@@ -63,9 +47,14 @@ namespace Adas.Ui.Wpf.Views.Setup
                     GoToStage(Stage.SelectCalibration);
                     break;
                 case Stage.SelectCalibration:
-                    GoToStage(Stage.Calibrate);
-                    stage_ = Stage.SelectCalibration;
-                    _controlHolder.Children.Add(new SetupCalibrationControl(this));
+                    if (Controller.Model.SkipCalibration)
+                    {
+                        GoToStage(Stage.Main);
+                    }
+                    else
+                    {
+                        GoToStage(Stage.Calibrate);
+                    }
                     break;
             }
         }
@@ -88,6 +77,11 @@ namespace Adas.Ui.Wpf.Views.Setup
                 case Stage.Calibrate:
                     var calibrateWindow = new CalibrationWindow(Controller);
                     calibrateWindow.Show();
+                    Close();
+                    break;
+                case Stage.Main:
+                    var mainwindow = new MainWindow(Controller);
+                    mainwindow.Show();
                     Close();
                     break;
             }

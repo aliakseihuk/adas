@@ -11,6 +11,7 @@ using Adas.Core.Algo;
 using Adas.Core.Camera;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using Microsoft.Win32;
 
 namespace Adas.Ui.Wpf
 {
@@ -51,7 +52,7 @@ namespace Adas.Ui.Wpf
         public StereoImage<Bgr, byte> GetCalibratedStereoImage()
         {
             var stereoImage = Model.StereoCamera.GetStereoImage();
-            if (Model.CalibrationModel.CalibrationResult != null)
+            if (Model.Calibrated)
                 StereoCalibration.RemapStereoImage(stereoImage, Model.CalibrationModel.CalibrationResult);
             return stereoImage;
         }
@@ -74,6 +75,29 @@ namespace Adas.Ui.Wpf
             var infosArray = infos.ToArray();
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Images", foldername, "sample.sti");
             SerializationHelper<StereoImageFileInfo[]>.XmlSerialize(infosArray, path);
+        }
+
+        public StereoImageFileInfo[] LoadStereoImageFileInfos()
+        {
+            var opendialog = new OpenFileDialog
+            {
+                DefaultExt = "sti",
+                Filter = "Stereo images Files(*.sti)|*.sti|All files (*.*)|*.*",
+                InitialDirectory = Directory.GetCurrentDirectory(),
+                Multiselect = false
+            };
+
+            if (opendialog.ShowDialog() == true)
+            {
+                var infos = SerializationHelper<StereoImageFileInfo[]>.XmlDeserialize(opendialog.FileName);
+                foreach (var info in infos)
+                {
+                    info.BasePath = Path.GetDirectoryName(opendialog.FileName);
+                }
+                return infos;
+            }
+
+            return null;
         }
     }
 }

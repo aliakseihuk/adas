@@ -35,5 +35,6 @@ namespace Adas.Ui.Wpf.ViewModels
         SetupCameraParameters,
         SelectCalibration,
         Calibrate,
+        Main
     }
 }

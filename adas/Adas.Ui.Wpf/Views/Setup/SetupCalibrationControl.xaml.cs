@@ -64,18 +64,10 @@ namespace Adas.Ui.Wpf.Views.Setup
 
         private void LoadSamplesClick(object sender, RoutedEventArgs e)
         {
-            var opendialog = new OpenFileDialog
+            var infos = window_.Controller.LoadStereoImageFileInfos();
+            if(infos != null)
             {
-                DefaultExt = "sti",
-                Filter = "Stereo images Files(*.sti)|*.sti|All files (*.*)|*.*",
-                InitialDirectory = Directory.GetCurrentDirectory(),
-                //InitialDirectory = @"e:\adas\Adas\Adas.Core\Data\"
-            };
-
-            if (opendialog.ShowDialog() == true)
-            {
-                Model.CalibrationModel.CalibrationSamplesInfo =
-                    SerializationHelper<StereoImageFileInfo[]>.XmlDeserialize(opendialog.FileName);
+                Model.CalibrationModel.CalibrationSamplesInfo = infos;
                 SetCalibrateButtonAppearance(true);
             }
         }
@@ -97,5 +89,11 @@ namespace Adas.Ui.Wpf.Views.Setup
         }
 
         #endregion
+
+        private void SkipClick(object sender, RoutedEventArgs e)
+        {
+            Model.SkipCalibration = true;
+            window_.GoNextStage();
+        }
     }
 }

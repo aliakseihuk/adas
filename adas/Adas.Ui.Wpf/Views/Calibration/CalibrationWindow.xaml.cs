@@ -24,7 +24,7 @@ namespace Adas.Ui.Wpf.Views.Calibration
 
             Controller = controller;
 
-            _viewModel = Model.CalibrationModel.CalibrationResult != null
+            _viewModel = Model.Calibrated
                 ? new CalibrationViewModel(Model.CalibrationModel.CalibrationResult.Settings)
                 : new CalibrationViewModel();
             _viewModel.CalibrationResult = Model.CalibrationModel.CalibrationResult;
