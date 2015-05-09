@@ -19,8 +19,7 @@ namespace Adas.Ui.Wpf
     {
         public AdasController()
         {
-            Model = new AdasModel();
-            Model.Mode = SourceMode.Image;
+            Model = new AdasModel {Mode = SourceMode.Image};
         }
 
         public AdasModel Model { get; private set; }

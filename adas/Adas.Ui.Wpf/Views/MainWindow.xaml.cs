@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -9,8 +10,11 @@ using Adas.Core;
 using Adas.Core.Algo;
 using Adas.Core.Camera;
 using Adas.Ui.Wpf.ViewModels;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Microsoft.Win32;
+using OpticalFlow = Adas.Core.Algo.OpticalFlow;
 
 namespace Adas.Ui.Wpf.Views
 {
@@ -63,7 +67,7 @@ namespace Adas.Ui.Wpf.Views
                 return;
 
             SourceImage.ViewModel.Image = image;
-            var temp = new StereoImage<Gray, byte>();
+            var temp = new StereoImage<Bgr, byte>();
 
             if (ResultImage.ViewModel.ShowLeft)
             {
@@ -71,10 +75,11 @@ namespace Adas.Ui.Wpf.Views
                 model.Image1 = image.LeftImage.Convert<Gray, byte>();
                 model.Image2 = image.RightImage.Convert<Gray, byte>();
                 var map = Stereo.Compute(model);
-
-                temp.LeftImage = map;
-                temp.RightImage = map;
-                    
+                var test = map.Convert<Bgr, byte>();
+                CvInvoke.ApplyColorMap(test, test, ColorMapType.Rainbow);
+                temp.LeftImage = test;
+                test = test.SmoothGaussian(15);
+                temp.RightImage = test;
             }
             if (ResultImage.ViewModel.ShowRight)
             {
@@ -82,7 +87,7 @@ namespace Adas.Ui.Wpf.Views
                 model.Image1 = image.LeftImage.Convert<Gray, byte>();
                 model.Image2 = image.RightImage.Convert<Gray, byte>();
                 var map = OpticalFlow.Compute(model);
-                temp.RightImage = map.Convert<Gray, byte>();
+                temp.RightImage = map.Convert<Bgr, byte>();
                 if (temp.LeftImage == null)
                     temp.LeftImage = temp.RightImage;
             }
