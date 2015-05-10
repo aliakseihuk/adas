@@ -108,36 +108,36 @@ namespace Adas.Core.Algo.Hough
 
         private static Tuple<LineSegment2D[], DashLineSegment2D[]> GroupDashSegment(List<LineSegment2D> segments)
         {
-            var chunks = new List<DashLineSegment2D>();
+            var chunks = new List<List<LineSegment2D>>();
             foreach (var segment in segments)
             {
                 var isAdded = false;
                 foreach (var chunk in chunks)
                 {
-                    var element = chunk.Elements.First();
+                    var element = chunk.First();
                     if (SegmentHelper.DirectionClose(element.Direction, segment.Direction) &&
                         SegmentHelper.OneLineClose(element, segment))
                     {
-                        chunk.Elements.Add(segment);
+                        chunk.Add(segment);
                         isAdded = true;
                         break;
                     }
                 }
                 if (!isAdded)
                 {
-                    var dash = new DashLineSegment2D();
-                    dash.Elements.Add(segment);
+                    var dash = new List<LineSegment2D> {segment};
                     chunks.Add(dash);
                 }
             }
-            chunks = chunks.Where(c => c.Elements.Count > 1).ToList();
+            var dashlines =
+                chunks.Where(c => c.Count > 1).Select(c => new DashLineSegment2D {Elements = c.ToArray()}).ToArray();
             var dashElements = new HashSet<LineSegment2D>();
-            foreach (var chunk in chunks)
+            foreach (var chunk in dashlines)
             {
                 dashElements.UnionWith(chunk.Elements);
             }
             var oldsegments = segments.Except(dashElements);
-            return new Tuple<LineSegment2D[], DashLineSegment2D[]>(oldsegments.ToArray(), chunks.ToArray());
+            return new Tuple<LineSegment2D[], DashLineSegment2D[]>(oldsegments.ToArray(), dashlines);
         }
     }
 }

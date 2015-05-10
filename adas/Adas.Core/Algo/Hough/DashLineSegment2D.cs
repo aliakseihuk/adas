@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
-using Emgu.CV.Structure;
+﻿using Emgu.CV.Structure;
 
 namespace Adas.Core.Algo.Hough
 {
     public class DashLineSegment2D
     {
-        public DashLineSegment2D()
-        {
-            Elements = new List<LineSegment2D>();
+        private LineSegment2D[] elements_;
+
+        public LineSegment2D[] Elements {
+            get { return elements_; }
+            set
+            {
+                elements_ = value;
+                AsSolid = SegmentHelper.MergeSegments(elements_);
+            }
         }
 
-        public List<LineSegment2D> Elements { get; private set; }
+        public LineSegment2D AsSolid { get; private set; }
     }
 }

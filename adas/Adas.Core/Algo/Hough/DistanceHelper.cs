@@ -4,8 +4,14 @@ using Emgu.CV.Structure;
 
 namespace Adas.Core.Algo.Hough
 {
-    internal class DistanceHelper
+    public class DistanceHelper
     {
+        //Compute the distance from A to B
+        public static double Distance(Point point1, Point point2)
+        {
+            return Math.Sqrt(Math.Pow(point1.X - point2.X, 2) + Math.Pow(point1.Y - point2.Y, 2));
+        }
+
         //Compute the distance from AB segment to C
         public static double SegmentToPointDistance2D(LineSegment2D segment, Point point)
         {
@@ -61,12 +67,6 @@ namespace Adas.Core.Algo.Hough
             ac.X = pointC.X - pointA.X;
             ac.Y = pointC.Y - pointA.Y;
             return ab.X*ac.Y - ab.Y*ac.X;
-        }
-
-        //Compute the distance from A to B
-        private static double Distance(Point point1, Point point2)
-        {
-            return Math.Sqrt(Math.Pow(point1.X - point2.X, 2) + Math.Pow(point1.Y - point2.Y, 2));
         }
     }
 }
