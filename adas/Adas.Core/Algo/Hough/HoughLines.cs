@@ -7,7 +7,7 @@ using Emgu.CV.Structure;
 
 namespace Adas.Core.Algo.Hough
 {
-    public static class HoughLine
+    public static class HoughLines
     {
         public const double ThetaResolution = 1.0;
         public const double RhoResolution = 1.0;
@@ -17,16 +17,14 @@ namespace Adas.Core.Algo.Hough
 
         public const double AngleThreshold = 0.50;
 
-        public static Tuple<LineSegment2D[], DashLineSegment2D[]> Compute(Image<Bgr, byte> image)
+        public static HoughResult Compute(Image<Bgr, byte> image)
         {
             var grayImage = PreprocessImage(image);
             var lines =
                 grayImage.HoughLinesBinary(RhoResolution, (ThetaResolution*Math.PI)/180, HoughThreshold, MinLineLenght,
                     LinesGap)[0];
             lines = lines.Where(l => Math.Abs(l.Direction.Y) > AngleThreshold).ToArray();
-            var result= GroupSegments(lines);
-            //var result = GroupDashSegment(mergedLines);
-            return result;
+            return GroupSegments(lines);
         }
 
         private static Image<Gray, byte> PreprocessImage(Image<Bgr, byte> image)
@@ -41,7 +39,7 @@ namespace Adas.Core.Algo.Hough
             return grayImage;
         }
 
-        private static Tuple<LineSegment2D[], DashLineSegment2D[]> GroupSegments(LineSegment2D[] segments)
+        private static HoughResult GroupSegments(LineSegment2D[] segments)
         {
             var solidSegments = new List<LineSegment2D>();
             var dashSegments = new List<DashLineSegment2D>();
@@ -53,7 +51,7 @@ namespace Adas.Core.Algo.Hough
                 solidSegments.AddRange(allSegments.Item1);
                 dashSegments.AddRange(allSegments.Item2);
             }
-            return new Tuple<LineSegment2D[], DashLineSegment2D[]>(solidSegments.ToArray(), dashSegments.ToArray());
+            return new HoughResult {SolidLines = solidSegments.ToArray(), DashLines = dashSegments.ToArray()};
         }
 
         private static List<Tuple<PointF, List<LineSegment2D>>> GroupDirectionSerment(LineSegment2D[] segments)

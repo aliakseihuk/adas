@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using Adas.Core.Algo.Hough;
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -17,20 +19,25 @@ namespace Adas.CoreTest
 
         public static Image<Bgr, byte> ProcessHoughTest(Image<Bgr, byte> image)
         {
+            const int leftMargin = 150;
+            const int upMargin = 350;
             var size = image.Size;
-            //image.ROI = new Rectangle(150, 400, size.Width - 300, size.Height - 400);
+            
+            image.ROI = new Rectangle(leftMargin, upMargin, size.Width - leftMargin*2, size.Height - upMargin);
 
-            var pair = HoughLine.Compute(image);
-            var solidlines = pair.Item1;
-            var dashlines = pair.Item2;
+            var result = HoughLines.Compute(image);
+
+            image.ROI = Rectangle.Empty;
+            result.MoveRoiResult(new Size(leftMargin, upMargin));
+            
             var red = new Bgr(Color.Red);
             var green = new Bgr(Color.Green);
-            foreach (var line in solidlines)
+            foreach (var line in result.SolidLines)
             {
                 image.Draw(line, red, 3);
             }
 
-            foreach (var dash in dashlines)
+            foreach (var dash in result.DashLines)
             {
                 foreach (var element in dash.Elements)
                 {

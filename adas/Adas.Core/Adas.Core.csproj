@@ -57,8 +57,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algo\Hough\DashLineSegment2D.cs" />
-    <Compile Include="Algo\Hough\HoughLine.cs" />
+    <Compile Include="Algo\Hough\HoughLines.cs" />
     <Compile Include="Algo\Hough\DistanceHelper.cs" />
+    <Compile Include="Algo\Hough\HoughResult.cs" />
     <Compile Include="Algo\Hough\SegmentHelper.cs" />
     <Compile Include="Algo\OpticalFlow.cs" />
     <Compile Include="Algo\Stereo.cs" />
