@@ -17,7 +17,7 @@ namespace Adas.Core.Algo.Hough
 
         public static bool DistanceClose(LineSegment2D segment1, LineSegment2D segment2)
         {
-            const double eps = 5.0;
+            const double eps = 10.0;
             var d1 = DistanceHelper.SegmentToPointDistance2D(segment1, segment2.P1);
             var d2 = DistanceHelper.SegmentToPointDistance2D(segment1, segment2.P2);
             return d1 < eps || d2 < eps;
@@ -25,7 +25,7 @@ namespace Adas.Core.Algo.Hough
 
         public static bool DirectionClose(PointF direction1, PointF direction2)
         {
-            const double eps = 0.2;
+            const double eps = 0.05;
             return Math.Abs(direction1.X) - Math.Abs(direction2.X) < eps &&
                    Math.Abs(direction1.Y) - Math.Abs(direction2.Y) < eps &&
                    ((Math.Sign(direction1.X) == Math.Sign(direction2.X) &&

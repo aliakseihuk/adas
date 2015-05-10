@@ -18,7 +18,7 @@ namespace Adas.CoreTest
         public static Image<Bgr, byte> ProcessHoughTest(Image<Bgr, byte> image)
         {
             var size = image.Size;
-            image.ROI = new Rectangle(150, 400, size.Width - 300, size.Height - 400);
+            //image.ROI = new Rectangle(150, 400, size.Width - 300, size.Height - 400);
 
             var pair = HoughLine.Compute(image);
             var solidlines = pair.Item1;

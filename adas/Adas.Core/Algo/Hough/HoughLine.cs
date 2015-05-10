@@ -15,14 +15,17 @@ namespace Adas.Core.Algo.Hough
         public const double MinLineLenght = 5.0;
         public const double LinesGap = 1.0;
 
+        public const double AngleThreshold = 0.50;
+
         public static Tuple<LineSegment2D[], DashLineSegment2D[]> Compute(Image<Bgr, byte> image)
         {
             var grayImage = PreprocessImage(image);
             var lines =
                 grayImage.HoughLinesBinary(RhoResolution, (ThetaResolution*Math.PI)/180, HoughThreshold, MinLineLenght,
                     LinesGap)[0];
-            var mergedLines = GroupSegments(lines);
-            var result = GroupDashSegment(mergedLines);
+            lines = lines.Where(l => Math.Abs(l.Direction.Y) > AngleThreshold).ToArray();
+            var result= GroupSegments(lines);
+            //var result = GroupDashSegment(mergedLines);
             return result;
         }
 
@@ -38,15 +41,19 @@ namespace Adas.Core.Algo.Hough
             return grayImage;
         }
 
-        private static List<LineSegment2D> GroupSegments(LineSegment2D[] segments)
+        private static Tuple<LineSegment2D[], DashLineSegment2D[]> GroupSegments(LineSegment2D[] segments)
         {
-            var result = new List<LineSegment2D>();
+            var solidSegments = new List<LineSegment2D>();
+            var dashSegments = new List<DashLineSegment2D>();
             var grouped = GroupDirectionSerment(segments);
             foreach (var group in grouped)
             {
-                result.AddRange(GroupCloseSegment(group.Item2));
+                var fullSegments = GroupCloseSegment(group.Item2);
+                var allSegments = GroupDashSegment(fullSegments);
+                solidSegments.AddRange(allSegments.Item1);
+                dashSegments.AddRange(allSegments.Item2);
             }
-            return result;
+            return new Tuple<LineSegment2D[], DashLineSegment2D[]>(solidSegments.ToArray(), dashSegments.ToArray());
         }
 
         private static List<Tuple<PointF, List<LineSegment2D>>> GroupDirectionSerment(LineSegment2D[] segments)
@@ -109,7 +116,9 @@ namespace Adas.Core.Algo.Hough
                 var isAdded = false;
                 foreach (var chunk in chunks)
                 {
-                    if (SegmentHelper.OneLineClose(chunk.Elements.First(), segment))
+                    var element = chunk.Elements.First();
+                    if (SegmentHelper.DirectionClose(element.Direction, segment.Direction) &&
+                        SegmentHelper.OneLineClose(element, segment))
                     {
                         chunk.Elements.Add(segment);
                         isAdded = true;
