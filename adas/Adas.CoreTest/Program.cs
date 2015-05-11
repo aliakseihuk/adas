@@ -15,7 +15,7 @@ namespace Adas.CoreTest
         {
             var image = new Image<Bgr, byte>("Images/image1.png");
             var houghResult = ProcessHoughTest(image);
-            ProcessWindowTest(image, houghResult);
+            var windows = ProcessWindowTest(image, houghResult);
             ImageViewer.Show(image);
         }
 
@@ -54,7 +54,7 @@ namespace Adas.CoreTest
         public static List<Rectangle> ProcessWindowTest(Image<Bgr, byte> image, HoughResult result)
         {
             const double scaleStep = 0.5;
-            const double minScale = 0.1;
+            const double minScale = 0.05;
             const double ratio = 1.5;
 
             //need to sort road lanes and select the nearest left and right lanes only
@@ -65,42 +65,19 @@ namespace Adas.CoreTest
             left = RotateLineSegment2D(left);
             right = RotateLineSegment2D(right);
 
+            var intersection = Intersection(left, right);
+            
+            var leftPoint = FindStartingPoint(left, image.Size);
+            var rightPoint = FindStartingPoint(right, image.Size);
 
-            //need to select right points
-            //var nearLeft = left.P1;
-            //var nearRight = right.P1;
+            var windowSize = rightPoint.X - leftPoint.X;
+            var windowMiddlePoint = new Point(leftPoint.X + windowSize/2, leftPoint.Y);
 
-            //var farLeft = left.P2;
-            //var farRight = right.P2;
-            //var nearLeft = new Point(204, 608);
-            //var nearRight = new Point(905, 608);
+            var windowDirection = new PointF(-(left.Direction.X + right.Direction.X * left.Direction.Y / right.Direction.Y) / 2,
+                -left.Direction.Y);
+            var middleDistance = (float)Math.Sqrt(windowDirection.X*windowDirection.X + windowDirection.Y*windowDirection.Y);
+            windowDirection = new PointF(windowDirection.X / middleDistance, windowDirection.Y / middleDistance);
 
-            //var farLeft = new Point(538, 390);
-            //var farRight = new Point(695, 390);
-            var nearLeft = FindStartingPoint(left, image.Size);
-            var nearRight = FindStartingPoint(right, image.Size);
-
-            var farLeft = new Point(538, 390);
-            var farRight = new Point(695, 390);
-
-            //sync Y coord there...
-
-
-            //
-
-
-            var nearDistance = nearRight.X - nearLeft.X;
-            var farDistance = farRight.X - farLeft.X;
-
-            var nearMiddle = new Point(nearLeft.X + nearDistance/2, nearLeft.Y);
-            var farMiddle = new Point(farLeft.X + farDistance/2, farLeft.Y);
-
-            //var direction = new PointF((left.Direction.X + right.Direction.X),
-            //    (left.Direction.Y + right.Direction.Y) / 2);
-            var direction = new Point(farMiddle.X - nearMiddle.X, farMiddle.Y - nearMiddle.Y);
-            var middleDistance = (float)Math.Sqrt(direction.X*direction.X + direction.Y*direction.Y);
-            var normalizeDirection = new PointF(direction.X/middleDistance, direction.Y/middleDistance);
-            middleDistance = (float)DistanceHelper.Distance(nearMiddle, farMiddle);
             //calculate step count
             var stepCount = 0;
             var temp = minScale;
@@ -110,19 +87,17 @@ namespace Adas.CoreTest
                 ++stepCount;
             } while (temp < 1);
 
-            var coefficient = nearDistance*middleDistance/(nearDistance - farDistance);
-            //var coefficient = nearDistance/(right.Direction.X - left.Direction.X);
-
-            //var coefficient = nearDistance / (nearDistance + left.Direction.X - right.Direction.X);
+            var coefficient = DistanceHelper.Distance(windowMiddlePoint, intersection);
+            
             var scale = 1.0;
             var windows = new List<Rectangle>();
             for (var i = 0; i < stepCount; ++i)
             {
-                var windowWidth = nearDistance*scale;
+                var windowWidth = windowSize*scale;
                 var windowHeight = windowWidth/ratio;
                 var length = (1.0 - scale)*coefficient;
-                var position = new Point((int) (nearMiddle.X + normalizeDirection.X*length),
-                    (int) (nearMiddle.Y + normalizeDirection.Y*length));
+                var position = new Point((int) (windowMiddlePoint.X + windowDirection.X*length),
+                    (int) (windowMiddlePoint.Y + windowDirection.Y*length));
                 var windowLeft = position.X - windowWidth/2;
                 var windowDown = position.Y - windowHeight;
                 windows.Add(new Rectangle((int) windowLeft, (int) windowDown, (int) windowWidth, (int) windowHeight));
@@ -136,6 +111,7 @@ namespace Adas.CoreTest
 
             return windows;
         }
+
 
         public static LineSegment2D RotateLineSegment2D(LineSegment2D segment)
         {
@@ -176,6 +152,16 @@ namespace Adas.CoreTest
                 }
                 return new Point(maxX, maxY);
             }
+        }
+
+        public static Point Intersection(LineSegment2D segment1, LineSegment2D segment2)
+        {
+            var d1 = segment1.Direction;
+            var d2 = segment2.Direction;
+            var y = (d1.Y*d2.Y*(segment1.P1.X - segment2.P1.X) - d1.X*d2.Y*segment1.P1.Y + d1.Y*d2.X*segment2.P1.Y)/
+                    (d1.Y*d2.X - d2.Y*d1.X);
+            var x = d1.X*(y - segment1.P1.Y)/d1.Y + segment1.P1.X;
+            return new Point((int)x, (int)y);
         }
     }
 }
