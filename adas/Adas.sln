@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.22823.1
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adas.Core", "Adas.Core\Adas.Core.csproj", "{E3C07F79-0C46-41AB-9CD8-6EA06B744822}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adas.Ui.Wpf", "Adas.Ui.Wpf\Adas.Ui.Wpf.csproj", "{568B217B-6CC4-4390-BF2D-7A9915F4348F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adas.CoreTest", "Adas.CoreTest\Adas.CoreTest.csproj", "{55F79101-D031-42C1-9F7E-A09C00092767}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adas.CoreVideoTest", "Adas.CoreVideoTest\Adas.CoreVideoTest.csproj", "{D89AD334-DB02-46A1-BDE5-1D09C4D68CAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{55F79101-D031-42C1-9F7E-A09C00092767}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55F79101-D031-42C1-9F7E-A09C00092767}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55F79101-D031-42C1-9F7E-A09C00092767}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D89AD334-DB02-46A1-BDE5-1D09C4D68CAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D89AD334-DB02-46A1-BDE5-1D09C4D68CAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D89AD334-DB02-46A1-BDE5-1D09C4D68CAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D89AD334-DB02-46A1-BDE5-1D09C4D68CAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

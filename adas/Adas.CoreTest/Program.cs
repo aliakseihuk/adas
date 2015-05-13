@@ -9,29 +9,33 @@ using Emgu.CV.UI;
 
 namespace Adas.CoreTest
 {
-    internal class Program
+    public class Program
     {
         private static void Main(string[] args)
         {
-            var image = new Image<Bgr, byte>("Images/image1.png");
-            var houghResult = ProcessHoughTest(image);
-            var windows = ProcessWindowTest(image, houghResult);
-            ImageViewer.Show(image);
+            new LaneVideoTest().Test();
+            //var image = new Image<Bgr, byte>("Images/image1.png");
+            //var houghResult = ProcessHoughTest(image);
+            //var windows = ProcessWindowTest(image, houghResult);
+            //ImageViewer.Show(image);
         }
 
         public static HoughResult ProcessHoughTest(Image<Bgr, byte> image)
         {
-            const int leftMargin = 150;
-            const int upMargin = 350;
+            const int leftMargin = 0;
+            const int upMargin = 300;
+            const int downMargin = 200;
             var size = image.Size;
-            
-            image.ROI = new Rectangle(leftMargin, upMargin, size.Width - leftMargin*2, size.Height - upMargin);
+
+            image.ROI = new Rectangle(leftMargin, upMargin, size.Width - leftMargin*2,
+                size.Height - upMargin - downMargin);
+
+            HoughLines.PreprocessImage(image);
 
             var result = HoughLines.Compute(image);
-
-            image.ROI = Rectangle.Empty;
-            result.MoveRoiResult(new Size(leftMargin, upMargin));
             
+            result.MoveRoiResult(new Size(leftMargin, upMargin));
+            image.ROI = Rectangle.Empty;
             var red = new Bgr(Color.Red);
             var green = new Bgr(Color.Green);
             foreach (var line in result.SolidLines)
