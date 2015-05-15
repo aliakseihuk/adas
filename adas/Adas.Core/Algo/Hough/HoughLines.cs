@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using DirectShowLib;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
@@ -81,6 +82,8 @@ namespace Adas.Core.Algo.Hough
                         
                         direction = new PointF(chunkDirection.X*(1 - weight) + direction.X*weight,
                             chunkDirection.Y*(1 - weight) + direction.Y*weight);
+                        var norm = (float) Math.Sqrt(direction.X*direction.X + direction.Y*direction.Y);
+                        direction = new PointF(direction.X/norm, direction.Y/norm);
                         chunks.Add(new Tuple<PointF, List<LineSegment2D>>(direction, chunkItems));
                         break;
                     }
@@ -173,50 +176,84 @@ namespace Adas.Core.Algo.Hough
 
     public class CacheLine
     {
-        public const int RealLineParentCount = 5;
-
-        private readonly int parentCount_;
-
-        public CacheLine(int parentCount)
+        public const int RealLineHistoryCount = 6;
+        
+        public CacheLine(CacheLine parent)
         {
-            parentCount_ = parentCount;
+            Parent = parent;
+            if(parent != null)
+                Parent.Child = this;
         }
 
-        public CacheLine(LineSegment2D segment, int parentCount)
-            : this(parentCount)
+        public CacheLine(LineSegment2D segment, CacheLine parent)
+            : this(parent)
         {
             Segment = segment;
         }
 
-        public CacheLine(DashLineSegment2D dashSegment, int parentCount)
-            : this(parentCount)
-        {
-            DashSegment = dashSegment;
-        }
-
         public LineSegment2D Segment { get; private set; }
-        public DashLineSegment2D DashSegment { get; private set; }
-        public bool HasChild { get; set; }
+        public CacheLine Child { get; private set; }
+        public CacheLine Parent { get; private set; }
 
-        public bool IsDash
+        public bool HasChild
         {
-            get { return DashSegment != null; }
+            get { return Child != null; }
         }
 
-        public int ParentsCount
+        public static bool IsReal(int lineHistoryCount)
         {
-            get { return parentCount_; }
+            return lineHistoryCount >= RealLineHistoryCount;
         }
 
-        public bool IsReal
+        public void ClearChildHistory()
         {
-            get { return parentCount_ >= RealLineParentCount; }
+            if (HasChild)
+            {
+                Child.Parent = null;
+                Child = null;
+            }
+        }
+
+        public List<CacheLine> GetAllLineHistory()
+        {
+            var list = new List<CacheLine>();
+            GetAllLineHistory(list);
+            return list.Take(RealLineHistoryCount).ToList();
+        }
+
+        public PointF GetAverageDirection()
+        {
+            var history = GetAllLineHistory();
+            var x = 0.0f;
+            var y = 0.0f;
+            foreach (var c in history)
+            {
+                if (c.Segment.Direction.X >= 0)
+                {
+                    x += c.Segment.Direction.X;
+                    y += c.Segment.Direction.Y;
+                }
+                else
+                {
+                    x -= c.Segment.Direction.X;
+                    y -= c.Segment.Direction.Y;
+                }
+            }
+            var norm = (float)Math.Sqrt(x * x + y * y);
+            return new PointF(x / norm, y / norm);
+        }
+
+        private void GetAllLineHistory(List<CacheLine> list)
+        {
+            list.Add(this);
+            if(Parent != null)
+                Parent.GetAllLineHistory(list);
         }
     }
 
     public class CacheLineContainer
     {
-        public const int ClearLevel = 10;
+        public const int ClearLevel = 8;
 
         private readonly Dictionary<int, List<CacheLine>> levels_ = new Dictionary<int, List<CacheLine>>();
 
@@ -243,65 +280,65 @@ namespace Adas.Core.Algo.Hough
 
         public void AddLine(LineSegment2D segment)
         {
-            var parent = AnalyzeParent(segment);
+            var parent = FindParent(segment);
             var cacheLine = new CacheLine(segment, parent);
             levels_[0].Add(cacheLine);
         }
 
         public void AddDashLine(DashLineSegment2D dashSegment)
         {
-            var parent = AnalyzeParent(dashSegment.AsSolid);
-            var cacheLine = new CacheLine(dashSegment, parent);
-            levels_[0].Add(cacheLine);
+            AddLine(dashSegment.AsSolid);
         }
 
         public HoughResult GetCachedResult()
         {
             var result = new HoughResult();
-            //var realLines =
-            //    levels_.Aggregate(
-            //        (p1, p2) => new KeyValuePair<int, List<CacheLine>>(0, p1.Value.Union(p2.Value).ToList()))
-            //        .Value.Where(_ => !_.HasChild && _.IsReal)
-            //        .ToArray();
-            var realLines = new List<CacheLine>();
+            var realLines = new List<LineSegment2D>();
             foreach(var level in levels_)
             {
-                var valid = level.Value.Where(_ => !_.HasChild && _.IsReal);
-                realLines.AddRange(valid);
+                var last = level.Value.Where(_ => !_.HasChild);
+                foreach (var line in last)
+                {
+                    var history = line.GetAllLineHistory();
+                    if (CacheLine.IsReal(history.Count))
+                    {
+                        //realLines.Add(history.First().Segment);
+                        realLines.Add(SegmentHelper.MergeSegments(history.Select(c => c.Segment).ToArray()));
+                    }
+                }
             }
-            result.SolidLines = realLines.Where(l => !l.IsDash).Select(l => l.Segment).ToArray();
-            result.DashLines = realLines.Where(l => l.IsDash).Select(l => l.DashSegment).ToArray();
+            result.SolidLines = realLines.ToArray();
+            result.DashLines = new DashLineSegment2D[0];
             return result;
         }
 
-        public int AnalyzeParent(LineSegment2D segment)
+        public CacheLine FindParent(LineSegment2D segment)
         {
             for (var i = 1; i < ClearLevel; ++i)
             {
                 var levelLines = levels_[i];
-                var parents = 0;
                 foreach (var element in levelLines.Where(l => !l.HasChild))
                 {
-                    var elementLine = element.IsDash ? element.DashSegment.AsSolid : element.Segment;
-                    if (SegmentHelper.DirectionClose(elementLine.Direction, segment.Direction))
+                    var avgDirection = element.GetAverageDirection();
+                    if (SegmentHelper.DirectionClose(avgDirection, segment.Direction))
                     {
-                        if (SegmentHelper.DistanceClose(elementLine, segment, true))
+                        if (SegmentHelper.DistanceClose(element.Segment, segment, true))
                         {
-                            parents = element.ParentsCount + 1;
-                            element.HasChild = true;
-                            break;
+                            return element;
                         }
                     }
                 }
-                if (parents > 0)
-                    return parents;
             }
-            return 0;
+            return null;
         }
 
         public void ShiftLevels()
         {
-            for (var i = 1; i < ClearLevel; ++i)
+            foreach (var element in levels_[ClearLevel-1])
+            {
+                element.ClearChildHistory();
+            }
+            for (var i = ClearLevel - 1; i > 0; --i)
             {
                 levels_[i] = levels_[i - 1];
             }

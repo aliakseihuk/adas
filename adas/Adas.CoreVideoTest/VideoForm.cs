@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Adas.Core.Algo.Hough;
 using Emgu.CV;
@@ -18,6 +11,7 @@ namespace Adas.CoreVideoTest
     {
         private readonly Capture capture_;
         private readonly CacheLineContainer cache_ = new CacheLineContainer();
+        private int frameCount_;
 
         public VideoForm()
         {
@@ -45,7 +39,9 @@ namespace Adas.CoreVideoTest
                 var frame = capture_.QueryFrame();
                 ProcessHoughTest(frame);
                 pictureBox1.Image = frame.Bitmap;
-                Thread.Sleep(100);
+
+                frameCount_++;
+                frameLabel_.Text = "frame: " + frameCount_;
             }
             else
             {
@@ -71,19 +67,9 @@ namespace Adas.CoreVideoTest
             result.MoveRoiResult(leftMargin, upMargin);
             image.ROI = Rectangle.Empty;
             var red = new Bgr(Color.Red);
-            var green = new Bgr(Color.Green);
             foreach (var line in result.SolidLines)
             {
                 image.Draw(line, red, 3);
-            }
-
-            foreach (var dash in result.DashLines)
-            {
-                foreach (var element in dash.Elements)
-                {
-                //    image.Draw(element, green, 3);
-                }
-                image.Draw(dash.AsSolid, red, 3);
             }
         }
     }

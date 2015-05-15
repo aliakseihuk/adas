@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
-using DirectShowLib.BDA;
 using Emgu.CV.Structure;
 
 namespace Adas.Core.Algo.Hough
@@ -21,7 +20,7 @@ namespace Adas.Core.Algo.Hough
         public static bool DistanceClose(LineSegment2D segment1, LineSegment2D segment2, bool checkIntersection = false)
         {
             const double eps = 35.0;
-            
+
             var d1 = DistanceHelper.SegmentToPointDistance2D(segment1, segment2.P1);
             var d2 = DistanceHelper.SegmentToPointDistance2D(segment1, segment2.P2);
             var d3 = DistanceHelper.SegmentToPointDistance2D(segment2, segment1.P1);
@@ -35,9 +34,9 @@ namespace Adas.Core.Algo.Hough
 
         public static bool DirectionClose(PointF direction1, PointF direction2)
         {
-            const double eps = 0.15;
-            return Math.Abs(direction1.X) - Math.Abs(direction2.X) < eps &&
-                   Math.Abs(direction1.Y) - Math.Abs(direction2.Y) < eps &&
+            const double eps = 0.1;
+            return Math.Abs(Math.Abs(direction1.X) - Math.Abs(direction2.X)) < eps &&
+                   Math.Abs(Math.Abs(direction1.Y) - Math.Abs(direction2.Y)) < eps &&
                    ((Math.Sign(direction1.X) == Math.Sign(direction2.X) &&
                      Math.Sign(direction1.Y) == Math.Sign(direction2.Y)) ||
                     (Math.Sign(direction1.X) != Math.Sign(direction2.X) &&
