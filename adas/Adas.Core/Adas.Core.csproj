@@ -60,6 +60,8 @@
     <Compile Include="Algo\Hough\HoughLines.cs" />
     <Compile Include="Algo\Hough\DistanceHelper.cs" />
     <Compile Include="Algo\Hough\HoughResult.cs" />
+    <Compile Include="Algo\Hough\LineCache.cs" />
+    <Compile Include="Algo\Hough\LineHistory.cs" />
     <Compile Include="Algo\Hough\SegmentHelper.cs" />
     <Compile Include="Algo\OpticalFlow.cs" />
     <Compile Include="Algo\Stereo.cs" />

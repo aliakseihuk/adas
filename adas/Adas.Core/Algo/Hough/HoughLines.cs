@@ -11,15 +11,16 @@ namespace Adas.Core.Algo.Hough
     {
         public const double ThetaResolution = 1.0;
         public const double RhoResolution = 1.0;
-        public const int HoughThreshold = 50;
+        public const int HoughThreshold = 40;
         public const double MinLineLenght = 5.0;
         public const double LinesGap = 1.0;
-
-        public const double AngleThreshold = 0.50;
+        public const double MinLineFullLenght = 70.0;
+        public const double AngleThreshold = 0.30;
 
         public static HoughResult Compute(Image<Bgr, byte> image)
         {
             var grayImage = PreprocessImage(image);
+
             var lines =
                 grayImage.HoughLinesBinary(RhoResolution, (ThetaResolution*Math.PI)/180, HoughThreshold, MinLineLenght,
                     LinesGap)[0];
@@ -27,13 +28,13 @@ namespace Adas.Core.Algo.Hough
             return GroupSegments(lines);
         }
 
-        private static Image<Gray, byte> PreprocessImage(Image<Bgr, byte> image)
+        public static Image<Gray, byte> PreprocessImage(Image<Bgr, byte> image)
         {
             var grayImage = image.Convert<Gray, byte>();
             var kernel = new Matrix<float>(new float[,] {{-1, 0, 1}, {-1, 0, 1}, {-1, 0, 1}});
             CvInvoke.cvFilter2D(grayImage, grayImage, kernel, new Point(-1, -1));
 
-            grayImage = grayImage.ThresholdBinary(new Gray(100), new Gray(255));
+            grayImage = grayImage.ThresholdBinary(new Gray(30), new Gray(255));
             grayImage = grayImage.SmoothGaussian(3);
             grayImage = grayImage.Erode(1);
             return grayImage;
@@ -48,8 +49,11 @@ namespace Adas.Core.Algo.Hough
             {
                 var fullSegments = GroupCloseSegment(group.Item2);
                 var allSegments = GroupDashSegment(fullSegments);
-                solidSegments.AddRange(allSegments.Item1);
-                dashSegments.AddRange(allSegments.Item2);
+                var dashSegment = GroupCloseDashSegment(allSegments.Item2);
+                solidSegments.AddRange(
+                    allSegments.Item1.Where(l => DistanceHelper.Distance(l.P1, l.P2) > MinLineFullLenght));
+                dashSegments.AddRange(
+                    dashSegment.Where(l => DistanceHelper.Distance(l.AsSolid.P1, l.AsSolid.P2) > MinLineFullLenght));
             }
             return new HoughResult {SolidLines = solidSegments.ToArray(), DashLines = dashSegments.ToArray()};
         }
@@ -59,6 +63,9 @@ namespace Adas.Core.Algo.Hough
             var chunks = new List<Tuple<PointF, List<LineSegment2D>>>();
             foreach (var segment in segments)
             {
+                var direction = segment.Direction.X >= 0
+                    ? new PointF(segment.Direction.X, segment.Direction.Y)
+                    : new PointF(-segment.Direction.X, -segment.Direction.Y);
                 var isMerged = false;
                 foreach (var chunk in chunks)
                 {
@@ -69,16 +76,20 @@ namespace Adas.Core.Algo.Hough
                         chunks.Remove(chunk);
                         var chunkItems = chunk.Item2;
                         chunkItems.Add(segment);
+
                         var weight = 1.0f/chunkItems.Count;
-                        var direction = new PointF(chunkDirection.X*(1 - weight) + segment.Direction.X*weight,
-                            chunkDirection.Y*(1 - weight) + segment.Direction.Y*weight);
+                        //all 
+
+                        direction = new PointF(chunkDirection.X*(1 - weight) + direction.X*weight,
+                            chunkDirection.Y*(1 - weight) + direction.Y*weight);
+                        var norm = (float) Math.Sqrt(direction.X*direction.X + direction.Y*direction.Y);
+                        direction = new PointF(direction.X/norm, direction.Y/norm);
                         chunks.Add(new Tuple<PointF, List<LineSegment2D>>(direction, chunkItems));
                         break;
                     }
                 }
                 if (!isMerged)
-                    chunks.Add(new Tuple<PointF, List<LineSegment2D>>(segment.Direction,
-                        new List<LineSegment2D> {segment}));
+                    chunks.Add(new Tuple<PointF, List<LineSegment2D>>(direction, new List<LineSegment2D> {segment}));
             }
             return chunks;
         }
@@ -106,6 +117,29 @@ namespace Adas.Core.Algo.Hough
             return segments.Count == chunks.Count ? chunks : GroupCloseSegment(chunks);
         }
 
+        private static List<DashLineSegment2D> GroupCloseDashSegment(DashLineSegment2D[] segments)
+        {
+            var chunks = new List<DashLineSegment2D>();
+            foreach (var segment in segments)
+            {
+                var isMerged = false;
+                foreach (var chunk in chunks)
+                {
+                    if (SegmentHelper.DistanceClose(chunk.AsSolid, segment.AsSolid))
+                    {
+                        var merged = new DashLineSegment2D {Elements = chunk.Elements.Union(segment.Elements).ToArray()};
+                        chunks.Remove(chunk);
+                        chunks.Add(merged);
+                        isMerged = true;
+                        break;
+                    }
+                }
+                if (!isMerged)
+                    chunks.Add(segment);
+            }
+            return segments.Length == chunks.Count ? chunks : GroupCloseDashSegment(chunks.ToArray());
+        }
+
         private static Tuple<LineSegment2D[], DashLineSegment2D[]> GroupDashSegment(List<LineSegment2D> segments)
         {
             var chunks = new List<List<LineSegment2D>>();
@@ -115,8 +149,7 @@ namespace Adas.Core.Algo.Hough
                 foreach (var chunk in chunks)
                 {
                     var element = chunk.First();
-                    if (SegmentHelper.DirectionClose(element.Direction, segment.Direction) &&
-                        SegmentHelper.OneLineClose(element, segment))
+                    if (SegmentHelper.OneLineClose(element, segment))
                     {
                         chunk.Add(segment);
                         isAdded = true;

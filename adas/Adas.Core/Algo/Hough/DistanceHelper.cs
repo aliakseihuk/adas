@@ -25,6 +25,24 @@ namespace Adas.Core.Algo.Hough
             return ElementToPointDistance2D(point1, point2, point, false);
         }
 
+        public static bool IsIntersect(LineSegment2D segment1, LineSegment2D segment2)
+        {
+            // Get the segments' parameters.
+            float dx12 = segment1.P2.X - segment1.P1.X;
+            float dy12 = segment1.P2.Y - segment1.P1.Y;
+            float dx34 = segment2.P2.X - segment2.P1.X;
+            float dy34 = segment2.P2.Y - segment2.P1.Y;
+
+            // Solve for t1 and t2
+            var denominator = (dy12*dx34 - dx12*dy34);
+            var t1 = ((segment1.P1.X - segment2.P1.X)*dy34 + (segment2.P1.Y - segment1.P1.Y)*dx34)/denominator;
+            if (float.IsInfinity(t1))
+            {
+                return false;
+            }
+            return true;
+        }
+
         //Compute the distance from AB to C
         //if isSegment is true, AB is a segment, not a line.
         private static double ElementToPointDistance2D(Point point1, Point point2, Point point, bool isSegment)

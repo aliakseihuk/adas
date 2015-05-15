@@ -6,7 +6,8 @@ namespace Adas.Core.Algo.Hough
     {
         private LineSegment2D[] elements_;
 
-        public LineSegment2D[] Elements {
+        public LineSegment2D[] Elements
+        {
             get { return elements_; }
             set
             {
