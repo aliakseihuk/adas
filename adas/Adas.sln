@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adas.Ui.Wpf", "Adas.Ui.Wpf\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adas.CoreTest", "Adas.CoreTest\Adas.CoreTest.csproj", "{55F79101-D031-42C1-9F7E-A09C00092767}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adas.ArduinoTest", "Adas.ArduinoTest\Adas.ArduinoTest.csproj", "{DB1EB4E5-975B-4198-B85E-E3E122BC0ADB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{55F79101-D031-42C1-9F7E-A09C00092767}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55F79101-D031-42C1-9F7E-A09C00092767}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55F79101-D031-42C1-9F7E-A09C00092767}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB1EB4E5-975B-4198-B85E-E3E122BC0ADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB1EB4E5-975B-4198-B85E-E3E122BC0ADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB1EB4E5-975B-4198-B85E-E3E122BC0ADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB1EB4E5-975B-4198-B85E-E3E122BC0ADB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
