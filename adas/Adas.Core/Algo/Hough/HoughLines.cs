@@ -7,7 +7,7 @@ using Emgu.CV.Structure;
 
 namespace Adas.Core.Algo.Hough
 {
-    public class HoughLines
+    public static class HoughLines
     {
         public const double ThetaResolution = 1.0;
         public const double RhoResolution = 1.0;
@@ -18,8 +18,6 @@ namespace Adas.Core.Algo.Hough
 
         public const double AngleThreshold = 0.30;
 
-        private static Cache cache_;
-
         public static HoughResult Compute(Image<Bgr, byte> image)
         {
             var grayImage = PreprocessImage(image);
@@ -28,18 +26,7 @@ namespace Adas.Core.Algo.Hough
                 grayImage.HoughLinesBinary(RhoResolution, (ThetaResolution*Math.PI)/180, HoughThreshold, MinLineLenght,
                     LinesGap)[0];
             lines = lines.Where(l => Math.Abs(l.Direction.Y) > AngleThreshold).ToArray();
-            var result =  GroupSegments(lines);
-
-            foreach (var solid in result.SolidLines)
-            {
-                cache_.AddLine(solid);
-            }
-            foreach (var dash in result.DashLines)
-            {
-                cache_.AddDashLine(dash);
-            }
-            var realLines = cache_.GetRealLines();
-            return result;
+            return GroupSegments(lines);
         }
 
         public static Image<Gray, byte> PreprocessImage(Image<Bgr, byte> image)
@@ -63,8 +50,9 @@ namespace Adas.Core.Algo.Hough
             {
                 var fullSegments = GroupCloseSegment(group.Item2);
                 var allSegments = GroupDashSegment(fullSegments);
+                var dashSegment = GroupCloseDashSegment(allSegments.Item2);
                 solidSegments.AddRange(allSegments.Item1.Where(l => DistanceHelper.Distance(l.P1, l.P2) > MinLineFullLenght));
-                dashSegments.AddRange(allSegments.Item2.Where(l => DistanceHelper.Distance(l.AsSolid.P1, l.AsSolid.P2) > MinLineFullLenght));
+                dashSegments.AddRange(dashSegment.Where(l => DistanceHelper.Distance(l.AsSolid.P1, l.AsSolid.P2) > MinLineFullLenght));
             }
             return new HoughResult {SolidLines = solidSegments.ToArray(), DashLines = dashSegments.ToArray()};
         }
@@ -74,6 +62,9 @@ namespace Adas.Core.Algo.Hough
             var chunks = new List<Tuple<PointF, List<LineSegment2D>>>();
             foreach (var segment in segments)
             {
+                var direction = segment.Direction.X >= 0
+                            ? new PointF(segment.Direction.X, segment.Direction.Y)
+                            : new PointF(-segment.Direction.X, -segment.Direction.Y);
                 var isMerged = false;
                 foreach (var chunk in chunks)
                 {
@@ -84,16 +75,18 @@ namespace Adas.Core.Algo.Hough
                         chunks.Remove(chunk);
                         var chunkItems = chunk.Item2;
                         chunkItems.Add(segment);
+
                         var weight = 1.0f/chunkItems.Count;
-                        var direction = new PointF(chunkDirection.X*(1 - weight) + segment.Direction.X*weight,
-                            chunkDirection.Y*(1 - weight) + segment.Direction.Y*weight);
+                        //all 
+                        
+                        direction = new PointF(chunkDirection.X*(1 - weight) + direction.X*weight,
+                            chunkDirection.Y*(1 - weight) + direction.Y*weight);
                         chunks.Add(new Tuple<PointF, List<LineSegment2D>>(direction, chunkItems));
                         break;
                     }
                 }
                 if (!isMerged)
-                    chunks.Add(new Tuple<PointF, List<LineSegment2D>>(segment.Direction,
-                        new List<LineSegment2D> {segment}));
+                    chunks.Add(new Tuple<PointF, List<LineSegment2D>>(direction, new List<LineSegment2D> {segment}));
             }
             return chunks;
         }
@@ -121,6 +114,29 @@ namespace Adas.Core.Algo.Hough
             return segments.Count == chunks.Count ? chunks : GroupCloseSegment(chunks);
         }
 
+        private static List<DashLineSegment2D> GroupCloseDashSegment(DashLineSegment2D[] segments)
+        {
+            var chunks = new List<DashLineSegment2D>();
+            foreach (var segment in segments)
+            {
+                var isMerged = false;
+                foreach (var chunk in chunks)
+                {
+                    if (SegmentHelper.DistanceClose(chunk.AsSolid, segment.AsSolid))
+                    {
+                        var merged = new DashLineSegment2D {Elements = chunk.Elements.Union(segment.Elements).ToArray()};
+                        chunks.Remove(chunk);
+                        chunks.Add(merged);
+                        isMerged = true;
+                        break;
+                    }
+                }
+                if (!isMerged)
+                    chunks.Add(segment);
+            }
+            return segments.Length == chunks.Count ? chunks : GroupCloseDashSegment(chunks.ToArray());
+        }
+
         private static Tuple<LineSegment2D[], DashLineSegment2D[]> GroupDashSegment(List<LineSegment2D> segments)
         {
             var chunks = new List<List<LineSegment2D>>();
@@ -130,8 +146,7 @@ namespace Adas.Core.Algo.Hough
                 foreach (var chunk in chunks)
                 {
                     var element = chunk.First();
-                    if (SegmentHelper.DirectionClose(element.Direction, segment.Direction) &&
-                        SegmentHelper.OneLineClose(element, segment))
+                    if (SegmentHelper.OneLineClose(element, segment))
                     {
                         chunk.Add(segment);
                         isAdded = true;
@@ -158,7 +173,7 @@ namespace Adas.Core.Algo.Hough
 
     public class CacheLine
     {
-        public const int RealLineParentCount = 3;
+        public const int RealLineParentCount = 5;
 
         private readonly int parentCount_;
 
@@ -199,17 +214,30 @@ namespace Adas.Core.Algo.Hough
         }
     }
 
-    public class Cache
+    public class CacheLineContainer
     {
-        public const int ClearLevel = 5;
+        public const int ClearLevel = 10;
 
-        private Dictionary<int, List<CacheLine>> lines_ = new Dictionary<int, List<CacheLine>>();
+        private readonly Dictionary<int, List<CacheLine>> levels_ = new Dictionary<int, List<CacheLine>>();
 
-        public Cache()
+        public CacheLineContainer()
         {
             for (var i = 0; i < ClearLevel; ++i)
             {
-                lines_[i] = new List<CacheLine>();
+                levels_[i] = new List<CacheLine>();
+            }
+        }
+
+        public void AddResult(HoughResult result)
+        {
+            ShiftLevels();
+            foreach (var solid in result.SolidLines)
+            {
+                AddLine(solid);
+            }
+            foreach (var dash in result.DashLines)
+            {
+                AddDashLine(dash);
             }
         }
 
@@ -217,37 +245,47 @@ namespace Adas.Core.Algo.Hough
         {
             var parent = AnalyzeParent(segment);
             var cacheLine = new CacheLine(segment, parent);
-            lines_[0].Add(cacheLine);
+            levels_[0].Add(cacheLine);
         }
 
         public void AddDashLine(DashLineSegment2D dashSegment)
         {
             var parent = AnalyzeParent(dashSegment.AsSolid);
             var cacheLine = new CacheLine(dashSegment, parent);
-            lines_[0].Add(cacheLine);
+            levels_[0].Add(cacheLine);
         }
 
-        public CacheLine[] GetRealLines()
+        public HoughResult GetCachedResult()
         {
-            return
-                lines_.Aggregate(
-                    (p1, p2) => new KeyValuePair<int, List<CacheLine>>(0, p1.Value.Union(p2.Value).ToList()))
-                    .Value.Where(_ => !_.HasChild && _.IsReal)
-                    .ToArray();
+            var result = new HoughResult();
+            //var realLines =
+            //    levels_.Aggregate(
+            //        (p1, p2) => new KeyValuePair<int, List<CacheLine>>(0, p1.Value.Union(p2.Value).ToList()))
+            //        .Value.Where(_ => !_.HasChild && _.IsReal)
+            //        .ToArray();
+            var realLines = new List<CacheLine>();
+            foreach(var level in levels_)
+            {
+                var valid = level.Value.Where(_ => !_.HasChild && _.IsReal);
+                realLines.AddRange(valid);
+            }
+            result.SolidLines = realLines.Where(l => !l.IsDash).Select(l => l.Segment).ToArray();
+            result.DashLines = realLines.Where(l => l.IsDash).Select(l => l.DashSegment).ToArray();
+            return result;
         }
 
         public int AnalyzeParent(LineSegment2D segment)
         {
             for (var i = 1; i < ClearLevel; ++i)
             {
-                var levelLines = lines_[i];
+                var levelLines = levels_[i];
                 var parents = 0;
                 foreach (var element in levelLines.Where(l => !l.HasChild))
                 {
                     var elementLine = element.IsDash ? element.DashSegment.AsSolid : element.Segment;
                     if (SegmentHelper.DirectionClose(elementLine.Direction, segment.Direction))
                     {
-                        if (SegmentHelper.DistanceClose(elementLine, segment))
+                        if (SegmentHelper.DistanceClose(elementLine, segment, true))
                         {
                             parents = element.ParentsCount + 1;
                             element.HasChild = true;
@@ -265,8 +303,9 @@ namespace Adas.Core.Algo.Hough
         {
             for (var i = 1; i < ClearLevel; ++i)
             {
-                lines_[i] = lines_[i - 1];
+                levels_[i] = levels_[i - 1];
             }
+            levels_[0] = new List<CacheLine>();
         }
     }
 }
