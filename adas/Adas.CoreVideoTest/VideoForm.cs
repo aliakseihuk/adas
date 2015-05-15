@@ -10,7 +10,7 @@ namespace Adas.CoreVideoTest
     public partial class VideoForm : Form
     {
         private readonly Capture capture_;
-        private readonly CacheLineContainer cache_ = new CacheLineContainer();
+        private readonly LineCache lineCache_ = new LineCache();
         private int frameCount_;
 
         public VideoForm()
@@ -61,8 +61,8 @@ namespace Adas.CoreVideoTest
             HoughLines.PreprocessImage(image);
 
             var result = HoughLines.Compute(image);
-            cache_.AddResult(result);
-            result = cache_.GetCachedResult();
+            lineCache_.AddResult(result);
+            result = lineCache_.GetCachedResult();
 
             result.MoveRoiResult(leftMargin, upMargin);
             image.ROI = Rectangle.Empty;

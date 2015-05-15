@@ -34,8 +34,8 @@ namespace Adas.Core.Algo.Hough
             float dy34 = segment2.P2.Y - segment2.P1.Y;
 
             // Solve for t1 and t2
-            float denominator = (dy12*dx34 - dx12*dy34);
-            float t1 = ((segment1.P1.X - segment2.P1.X) * dy34 + (segment2.P1.Y - segment1.P1.Y) * dx34) / denominator;
+            var denominator = (dy12*dx34 - dx12*dy34);
+            var t1 = ((segment1.P1.X - segment2.P1.X)*dy34 + (segment2.P1.Y - segment1.P1.Y)*dx34)/denominator;
             if (float.IsInfinity(t1))
             {
                 return false;

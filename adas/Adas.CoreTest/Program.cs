@@ -13,16 +13,10 @@ namespace Adas.CoreTest
     {
         private static void Main(string[] args)
         {
-            //new LaneVideoTest().Test();
-            //var image = new Image<Bgr, byte>("Images/image1.png");
-            //var houghResult = ProcessHoughTest(image);
-            //var windows = ProcessWindowTest(image, houghResult);
-            //ImageViewer.Show(image);
-
-            //var segment1 = new LineSegment2D(new Point(0, 0), new Point(15, 0));
-            //var segment2 = new LineSegment2D(new Point(0, 15), new Point(0, -15));
-
-            //var close = SegmentHelper.DistanceClose(segment1, segment2);
+            var image = new Image<Bgr, byte>("Images/image1.png");
+            var houghResult = ProcessHoughTest(image);
+            var windows = ProcessWindowTest(image, houghResult);
+            ImageViewer.Show(image);
         }
 
         public static HoughResult ProcessHoughTest(Image<Bgr, byte> image)
@@ -50,12 +44,12 @@ namespace Adas.CoreTest
 
             foreach (var dash in result.DashLines)
             {
-                //foreach (var element in dash.Elements)
-                //{
-                //    image.Draw(element, green, 3);
-                //}
+                foreach (var element in dash.Elements)
+                {
+                    image.Draw(element, green, 3);
+                }
 
-                //image.Draw(dash.AsSolid, green, 3);
+                image.Draw(dash.AsSolid, green, 3);
             }
             return result;
         }
