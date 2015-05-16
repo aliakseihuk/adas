@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Windows.Forms.VisualStyles;
 using Adas.Core.Algo.Hough;
+using Adas.Core.Algo.Window;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.UI;
@@ -13,185 +16,110 @@ namespace Adas.CoreTest
     {
         private static void Main(string[] args)
         {
-            var image = new Image<Bgr, byte>("Images/image1.png");
-            var houghResult = ProcessHoughTest(image);
-            var windows = ProcessWindowTest(image, houghResult);
-            ImageViewer.Show(image);
+            //var image = new Image<Bgr, byte>("Images/image1.png");
+            //
+
+            ProcessCarDetectionTest();
         }
 
-        public static HoughResult ProcessHoughTest(Image<Bgr, byte> image)
+        public static void ProcessCarDetectionTest()
         {
-            const int leftMargin = 0;
-            const int upMargin = 300;
-            const int downMargin = 200;
-            var size = image.Size;
+            var image = new Image<Gray, byte>("Images/disparity.png");
 
-            image.ROI = new Rectangle(leftMargin, upMargin, size.Width - leftMargin*2,
-                size.Height - upMargin - downMargin);
+            var left = new LineSegment2D(new Point(61, 221), new Point(121, 175));
+            var right = new LineSegment2D(new Point(253, 221), new Point(209, 175));
 
-            HoughLines.PreprocessImage(image);
+            ////*****draw lines*****
+            //var red = new Bgr(Color.Red);
+            //image.Draw(left, red, 1);
+            //image.Draw(right, red, 1);
 
-            var result = HoughLines.Compute(image);
-            
-            result.MoveRoiResult(leftMargin, upMargin);
-            image.ROI = Rectangle.Empty;
-            var red = new Bgr(Color.Red);
-            var green = new Bgr(Color.Green);
-            foreach (var line in result.SolidLines)
-            {
-                image.Draw(line, red, 3);
-            }
+            var original = CalculateHistogram(image);
+            var cutted = new float[256];
+            Array.Copy(original, cutted, 256);
 
-            foreach (var dash in result.DashLines)
-            {
-                foreach (var element in dash.Elements)
-                {
-                    image.Draw(element, green, 3);
-                }
+            var windows = WindowFlow.Compute(image.Size, new[] {left, right});
+            var allValues = new List<float[]>();
 
-                image.Draw(dash.AsSolid, green, 3);
-            }
-            return result;
-        }
-
-        public static List<Rectangle> ProcessWindowTest(Image<Bgr, byte> image, HoughResult result)
-        {
-            const double scaleStep = 0.5;
-            const double minScale = 0.05;
-            const double ratio = 1.5;
-
-            var allLines =
-                result.DashLines.Select(d => d.AsSolid).Union(result.SolidLines).Select(RotateLineSegment2D).ToArray();
-
-            LineSegment2D left = default(LineSegment2D);
-            LineSegment2D right = default(LineSegment2D);
-            Point leftPoint = new Point(int.MinValue, 0);
-            Point rightPoint = new Point(int.MaxValue, 0);
-
-            var viewPoint = image.Size.Width / 2;
-
-            foreach (var line in allLines)
-            {
-                var start = FindStartingPoint(line, image.Size.Width, image.Size.Height, false);
-                if (start.X >= leftPoint.X && start.X <= viewPoint)
-                {
-                    left = line;
-                    leftPoint = start;
-                }
-                else if(start.X <= rightPoint.X && start.X > viewPoint)
-                {
-                    right = line;
-                    rightPoint = start;
-                }
-            }
-
-            var maxY = Math.Min(FindStartingPoint(left, image.Size.Width, image.Size.Height, true).Y,
-                FindStartingPoint(right, image.Size.Width, image.Size.Height, true).Y);
-
-            leftPoint = FindStartingPoint(left, image.Size.Width, maxY, false);
-            rightPoint = FindStartingPoint(right, image.Size.Width, maxY, false);
-
-            var intersection = Intersection(left, right);
-
-            image.Draw(new CircleF(intersection, 5), new Bgr(Color.AliceBlue), 3);
-            
-            var windowSize = rightPoint.X - leftPoint.X;
-            var windowMiddlePoint = new Point(leftPoint.X + windowSize/2, leftPoint.Y);
-            image.Draw(new CircleF(windowMiddlePoint, 5), new Bgr(Color.AliceBlue), 3);
-            var windowDirection = new PointF(-(left.Direction.X + right.Direction.X * left.Direction.Y / right.Direction.Y) / 2,
-                -left.Direction.Y);
-            var middleDistance = (float)Math.Sqrt(windowDirection.X*windowDirection.X + windowDirection.Y*windowDirection.Y);
-            windowDirection = new PointF(windowDirection.X / middleDistance, windowDirection.Y / middleDistance);
-
-            //calculate step count
-            var stepCount = 0;
-            var temp = minScale;
-            do
-            {
-                temp = temp/scaleStep;
-                ++stepCount;
-            } while (temp < 1);
-
-            var coefficient = DistanceHelper.Distance(windowMiddlePoint, intersection);
-            
-            var scale = 1.0;
-            var windows = new List<Rectangle>();
-            for (var i = 0; i < stepCount; ++i)
-            {
-                var windowWidth = windowSize*scale;
-                var windowHeight = windowWidth/ratio;
-                var length = (1.0 - scale)*coefficient;
-                var position = new Point((int) (windowMiddlePoint.X + windowDirection.X*length),
-                    (int) (windowMiddlePoint.Y + windowDirection.Y*length));
-                var windowLeft = position.X - windowWidth/2;
-                var windowDown = position.Y - windowHeight;
-                windows.Add(new Rectangle((int) windowLeft, (int) windowDown, (int) windowWidth, (int) windowHeight));
-                scale *= scaleStep;
-            }
-
-            DrawWindows(image, windows);
-
-            return windows;
-        }
-
-        public static void DrawWindows(Image<Bgr, byte> image, List<Rectangle> windows)
-        {
+            int counter = 0;
             foreach (var window in windows)
             {
-                image.Draw(window, new Bgr(Color.Blue), 2);
-            }
-        }
-
-
-        public static LineSegment2D RotateLineSegment2D(LineSegment2D segment)
-        {
-            if (segment.P1.Y < segment.P2.Y)
-            {
-                segment = new LineSegment2D(segment.P2, segment.P1);
-            }
-            return segment;
-        }
-
-        public static Point FindStartingPoint(LineSegment2D segment, int maxX, int maxY, bool crop)
-        {
-            double distance = maxY - segment.P1.Y;
-            var x = (int) (distance/segment.Direction.Y*segment.Direction.X + segment.P1.X);
-            if(!crop)
-                return new Point(x, maxY);
-            if (x >= 0 && x < maxX)
-            {
-                return new Point(x, maxY);
-            }
-            if (segment.Direction.X > 0)
-            {
-                distance = maxX - segment.P1.X;
-                var y = (int)(distance / segment.Direction.X * segment.Direction.Y + segment.P1.Y);
-                if (y >= 0 && y < maxY)
+                counter++;
+                image.ROI = window;
+                var values = CalculateHistogram(image);
+                for (var i = 0; i < original.Length; ++i)
                 {
-                    return new Point(maxX, y);
+                    if (original[i] > 0)
+                        values[i] = (original[i] - values[i])/original[i];
+                    else
+                        values[i] = 1.0f;
                 }
-                return new Point(maxX, maxY);
-            }
-            else
-            {
-                distance = segment.P1.X;
-                var y = (int)(-distance / segment.Direction.X * segment.Direction.Y + segment.P1.Y);
-                if (y >= 0 && y < maxY)
+                if (AnalyzeHistogram(values))
                 {
-                    return new Point(0, y);
+                    Console.WriteLine(counter);
                 }
-                return new Point(0, maxY);
+
+                allValues.Add(values);
             }
+
+            //PrintData(allValues);
+
+
+            //ImageViewer.Show(image);
+
         }
 
-        public static Point Intersection(LineSegment2D segment1, LineSegment2D segment2)
+        public static float[] CalculateHistogram(Image<Gray, byte> image)
         {
-            var d1 = segment1.Direction;
-            var d2 = segment2.Direction;
-            var y = (d1.Y*d2.Y*(segment1.P1.X - segment2.P1.X) - d1.X*d2.Y*segment1.P1.Y + d1.Y*d2.X*segment2.P1.Y)/
-                    (d1.Y*d2.X - d2.Y*d1.X);
-            var x = d1.X*(y - segment1.P1.Y)/d1.Y + segment1.P1.X;
-            return new Point((int)x, (int)y);
+            var histogram = new DenseHistogram(256, new RangeF(0.0f, 255.0f));
+
+            histogram.Calculate(new[] {image}, true, null);
+            var values = new float[256];
+            histogram.MatND.ManagedArray.CopyTo(values, 0);
+            return values;
+        }
+
+        public static bool AnalyzeHistogram(float[] values)
+        {
+            const double eps = 0.05;
+            const int minObjectSize = 2;
+            const int maxObjectrSize = 20;
+            var lastMax = values.Length;
+            var functionSize = 0;
+            for (var i = values.Length-1; i >= 0; --i)
+            {
+                if (Math.Abs(1.0 - values[i]) < eps)
+                {
+                    if (functionSize > minObjectSize)
+                    {
+                        return true;
+                    }
+                    lastMax = i;
+                }
+                else
+                {
+                    if (functionSize > maxObjectrSize)
+                        return false;
+                    functionSize = lastMax - i;
+                }
+            }
+            return false;
+        }
+
+
+
+
+
+        public static void PrintData(List<float[]> values)
+        {
+            using (var writer = new StreamWriter(new FileStream("output.txt", FileMode.OpenOrCreate, FileAccess.Write)))
+            {
+                foreach (var v in values)
+                {
+                    var str = string.Join(" ", v);
+                    writer.WriteLine(str);
+                }
+            }
         }
     }
 }

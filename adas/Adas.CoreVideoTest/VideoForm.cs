@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using Adas.Core.Algo.Hough;
+using Adas.Core.Algo.Window;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
@@ -14,6 +15,7 @@ namespace Adas.CoreVideoTest
         private readonly Capture capture_;
         private readonly LineCache lineCache_ = new LineCache();
         private int frameCount_;
+        private List<Rectangle> windows_;
 
         public VideoForm()
         {
@@ -34,8 +36,6 @@ namespace Adas.CoreVideoTest
             }
         }
 
-        private List<Rectangle> windows_;
-
         private void UpdateImage(object sender, EventArgs eventArgs)
         {
             if (capture_.Grab())
@@ -44,14 +44,11 @@ namespace Adas.CoreVideoTest
                 var result = ProcessHoughTest(frame);
                 if (result.SolidLines.Length > 1)
                 {
-                    windows_ = CoreTest.Program.ProcessWindowTest(frame, result);
+                    windows_ = WindowFlow.Compute(frame.Size, result.SolidLines);
                 }
-                else
+                if (windows_ != null)
                 {
-                    if (windows_ != null)
-                    {
-                        CoreTest.Program.DrawWindows(frame, windows_);
-                    }
+                    WindowFlow.DrawWindows(frame, windows_);
                 }
                 pictureBox1.Image = frame.Bitmap;
 
