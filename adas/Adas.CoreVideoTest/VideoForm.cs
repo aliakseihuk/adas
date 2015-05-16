@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 using Adas.Core.Algo.Hough;
 using Emgu.CV;
@@ -16,7 +18,7 @@ namespace Adas.CoreVideoTest
         public VideoForm()
         {
             InitializeComponent();
-            capture_ = new Capture("d:\\4lera\\testvideo2.avi");
+            capture_ = new Capture("testvideo2.avi");
             KeyDown += OnKeyDown;
         }
 
@@ -32,23 +34,38 @@ namespace Adas.CoreVideoTest
             }
         }
 
+        private List<Rectangle> windows_;
+
         private void UpdateImage(object sender, EventArgs eventArgs)
         {
             if (capture_.Grab())
             {
                 var frame = capture_.QueryFrame();
-                ProcessHoughTest(frame);
+                var result = ProcessHoughTest(frame);
+                if (result.SolidLines.Length > 1)
+                {
+                    windows_ = CoreTest.Program.ProcessWindowTest(frame, result);
+                }
+                else
+                {
+                    if (windows_ != null)
+                    {
+                        CoreTest.Program.DrawWindows(frame, windows_);
+                    }
+                }
                 pictureBox1.Image = frame.Bitmap;
 
                 frameCount_++;
                 frameLabel_.Text = "frame: " + frameCount_;
+
+                Thread.Sleep(10);
             }
             else
             {
                 Application.Idle -= UpdateImage;
             }
         }
-        private void ProcessHoughTest(Image<Bgr, byte> image)
+        private HoughResult ProcessHoughTest(Image<Bgr, byte> image)
         {
             const int leftMargin = 0;
             const int upMargin = 300;
@@ -71,6 +88,7 @@ namespace Adas.CoreVideoTest
             {
                 image.Draw(line, red, 3);
             }
+            return result;
         }
     }
 }

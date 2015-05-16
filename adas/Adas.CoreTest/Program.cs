@@ -60,22 +60,44 @@ namespace Adas.CoreTest
             const double minScale = 0.05;
             const double ratio = 1.5;
 
-            //need to sort road lanes and select the nearest left and right lanes only
+            var allLines =
+                result.DashLines.Select(d => d.AsSolid).Union(result.SolidLines).Select(RotateLineSegment2D).ToArray();
 
-            var left = result.DashLines.First().AsSolid;
-            var right = result.SolidLines.First();
+            LineSegment2D left = default(LineSegment2D);
+            LineSegment2D right = default(LineSegment2D);
+            Point leftPoint = new Point(int.MinValue, 0);
+            Point rightPoint = new Point(int.MaxValue, 0);
 
-            left = RotateLineSegment2D(left);
-            right = RotateLineSegment2D(right);
+            var viewPoint = image.Size.Width / 2;
+
+            foreach (var line in allLines)
+            {
+                var start = FindStartingPoint(line, image.Size.Width, image.Size.Height, false);
+                if (start.X >= leftPoint.X && start.X <= viewPoint)
+                {
+                    left = line;
+                    leftPoint = start;
+                }
+                else if(start.X <= rightPoint.X && start.X > viewPoint)
+                {
+                    right = line;
+                    rightPoint = start;
+                }
+            }
+
+            var maxY = Math.Min(FindStartingPoint(left, image.Size.Width, image.Size.Height, true).Y,
+                FindStartingPoint(right, image.Size.Width, image.Size.Height, true).Y);
+
+            leftPoint = FindStartingPoint(left, image.Size.Width, maxY, false);
+            rightPoint = FindStartingPoint(right, image.Size.Width, maxY, false);
 
             var intersection = Intersection(left, right);
-            
-            var leftPoint = FindStartingPoint(left, image.Size);
-            var rightPoint = FindStartingPoint(right, image.Size);
 
+            image.Draw(new CircleF(intersection, 5), new Bgr(Color.AliceBlue), 3);
+            
             var windowSize = rightPoint.X - leftPoint.X;
             var windowMiddlePoint = new Point(leftPoint.X + windowSize/2, leftPoint.Y);
-
+            image.Draw(new CircleF(windowMiddlePoint, 5), new Bgr(Color.AliceBlue), 3);
             var windowDirection = new PointF(-(left.Direction.X + right.Direction.X * left.Direction.Y / right.Direction.Y) / 2,
                 -left.Direction.Y);
             var middleDistance = (float)Math.Sqrt(windowDirection.X*windowDirection.X + windowDirection.Y*windowDirection.Y);
@@ -105,14 +127,19 @@ namespace Adas.CoreTest
                 var windowDown = position.Y - windowHeight;
                 windows.Add(new Rectangle((int) windowLeft, (int) windowDown, (int) windowWidth, (int) windowHeight));
                 scale *= scaleStep;
-            }  
+            }
 
+            DrawWindows(image, windows);
+
+            return windows;
+        }
+
+        public static void DrawWindows(Image<Bgr, byte> image, List<Rectangle> windows)
+        {
             foreach (var window in windows)
             {
                 image.Draw(window, new Bgr(Color.Blue), 2);
             }
-
-            return windows;
         }
 
 
@@ -125,35 +152,35 @@ namespace Adas.CoreTest
             return segment;
         }
 
-        public static Point FindStartingPoint(LineSegment2D segment, Size imageSize)
+        public static Point FindStartingPoint(LineSegment2D segment, int maxX, int maxY, bool crop)
         {
-            var maxY = imageSize.Height - 1;
             double distance = maxY - segment.P1.Y;
             var x = (int) (distance/segment.Direction.Y*segment.Direction.X + segment.P1.X);
-            if (x >= 0 && x < imageSize.Width)
+            if(!crop)
+                return new Point(x, maxY);
+            if (x >= 0 && x < maxX)
             {
                 return new Point(x, maxY);
             }
             if (segment.Direction.X > 0)
             {
-                distance = segment.P1.X;
-                var y = (int) (distance/segment.Direction.X*segment.Direction.Y + segment.P1.Y);
-                if (y >= 0 && y < imageSize.Height)
-                {
-                    return new Point(0, y);
-                }
-                return new Point(0, maxY);
-            }
-            else
-            {
-                var maxX = imageSize.Width - 1;
                 distance = maxX - segment.P1.X;
-                var y = (int) (-distance/segment.Direction.X*segment.Direction.Y + segment.P1.Y);
-                if (y >= 0 && y < imageSize.Height)
+                var y = (int)(distance / segment.Direction.X * segment.Direction.Y + segment.P1.Y);
+                if (y >= 0 && y < maxY)
                 {
                     return new Point(maxX, y);
                 }
                 return new Point(maxX, maxY);
+            }
+            else
+            {
+                distance = segment.P1.X;
+                var y = (int)(-distance / segment.Direction.X * segment.Direction.Y + segment.P1.Y);
+                if (y >= 0 && y < maxY)
+                {
+                    return new Point(0, y);
+                }
+                return new Point(0, maxY);
             }
         }
 
